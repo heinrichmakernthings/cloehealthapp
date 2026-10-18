@@ -490,6 +490,30 @@ textarea{min-height:88px;resize:vertical}.row2{display:grid;grid-template-column
   #biscuitsMascot.pose-happy,#biscuitsMascot.pose-love,#biscuitsMascot.pose-zoom,#biscuitsMascot.pose-shock{animation:none!important}
 }
 
+
+/* === cycle tracker + extra Biscuits life === */
+.cycle-card{background:linear-gradient(135deg,#fff,var(--pink),var(--lilac));border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:12px}
+.cycle-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.cycle-phase{font-size:18px;font-weight:850}
+.cycle-estimate{font-size:11px;color:var(--muted);margin-top:3px}
+.cycle-hints{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.cycle-hint{padding:6px 9px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:11px}
+.cycle-settings{display:grid;grid-template-columns:1.3fr .8fr .8fr;gap:7px;margin-top:11px}
+.cycle-settings label{font-size:10px;margin-bottom:4px;color:var(--muted)}
+.cycle-settings input{min-height:40px;padding:8px 9px;font-size:14px}
+.cycle-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.cycle-actions button{min-height:38px;border:1px solid var(--line);background:#fff;border-radius:11px;padding:7px 10px;font-size:11px;font-weight:800}
+.cycle-note{font-size:10px;color:var(--muted);line-height:1.4;margin-top:8px}
+@media(max-width:520px){.cycle-settings{grid-template-columns:1fr 1fr}.cycle-settings>div:first-child{grid-column:1/-1}}
+
+#biscuitsMascot.pose-stretch{animation:biscuitsStretch .9s ease}
+#biscuitsMascot.pose-pounce{animation:biscuitsPounce .72s ease}
+#biscuitsMascot.pose-wave{animation:biscuitsWave .8s ease}
+#biscuitsMascot.pose-loaf{transform:scale(1.06,.82) translateY(5px)}
+@keyframes biscuitsStretch{0%,100%{transform:scale(1)}45%{transform:scale(1.18,.82) translateY(5px) rotate(-3deg)}70%{transform:scale(.96,1.1) translateY(-4px)}}
+@keyframes biscuitsPounce{0%,100%{transform:translate(0,0) scale(1)}35%{transform:translate(-8px,-5px) scale(.92) rotate(-6deg)}65%{transform:translate(11px,-12px) scale(1.13) rotate(7deg)}}
+@keyframes biscuitsWave{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg) translateY(-3px)}50%{transform:rotate(9deg) translateY(-5px)}75%{transform:rotate(-7deg) translateY(-2px)}}
+@media(prefers-reduced-motion:reduce){#biscuitsMascot.pose-stretch,#biscuitsMascot.pose-pounce,#biscuitsMascot.pose-wave{animation:none!important}}
 </style>
 </head>
 <body>
@@ -616,6 +640,28 @@ textarea{min-height:88px;resize:vertical}.row2{display:grid;grid-template-column
 
       
 
+
+
+      <div class="cycle-card" id="cycleCard">
+        <div class="cycle-head">
+          <div>
+            <div class="eyebrow">Cycle check-in 🌙</div>
+            <div class="cycle-phase" id="cyclePhase">Add period start to begin</div>
+            <div class="cycle-estimate" id="cycleEstimate">A gentle estimate only.</div>
+          </div>
+          <span class="badge" id="cycleDayBadge">Day ?</span>
+        </div>
+        <div class="cycle-hints" id="cycleHints"></div>
+        <div class="cycle-settings">
+          <div><label>Last period started</label><input type="date" id="cycleLastStart"></div>
+          <div><label>Usual cycle</label><input type="number" id="cycleLength" min="20" max="60" value="28"></div>
+          <div><label>Period length</label><input type="number" id="cyclePeriodLength" min="2" max="10" value="5"></div>
+        </div>
+        <div class="cycle-actions">
+          <button type="button" id="periodStartedToday">🩸 Period started today</button>
+        </div>
+        <div class="cycle-note">Possible feelings are gentle prompts, not predictions. Cycles can vary, especially with PCOS, stress, illness or routine changes.</div>
+      </div>
 
       <div class="home-recent">
         <div class="home-recent-head">
@@ -1015,7 +1061,7 @@ textarea{min-height:88px;resize:vertical}.row2{display:grid;grid-template-column
       d14:{publicLabel:'Blind-box surprise 🎁'},
       d30:{publicLabel:'Pumpkin Bartholomew bear 🧸'}
     },
-    revealed30:false,revealed14:false,loot:[],streakPasses:0,lastSave:null,achievements:[],coupons:{}};
+    revealed30:false,revealed14:false,loot:[],streakPasses:0,lastSave:null,achievements:[],coupons:{},cycle:{lastPeriodStart:'',cycleLength:28,periodLength:5}};
  let state;
  function freshState(){
    return JSON.parse(JSON.stringify(defaultState));
@@ -1035,7 +1081,13 @@ textarea{min-height:88px;resize:vertical}.row2{display:grid;grid-template-column
      streakPasses:Number.isFinite(Number(s.streakPasses))?Number(s.streakPasses):0,
      lastSave:(s.lastSave&&typeof s.lastSave==='object')?s.lastSave:null,
      achievements:Array.isArray(s.achievements)?s.achievements:[],
-     coupons:(s.coupons&&typeof s.coupons==='object')?s.coupons:{}
+     coupons:(s.coupons&&typeof s.coupons==='object')?s.coupons:{},
+     cycle:{
+       ...base.cycle,
+       ...((s.cycle&&typeof s.cycle==='object')?s.cycle:{}),
+       cycleLength:Math.max(20,Math.min(60,Number(s.cycle?.cycleLength)||28)),
+       periodLength:Math.max(2,Math.min(10,Number(s.cycle?.periodLength)||5))
+     }
    };
  }
  try{
@@ -1122,6 +1174,19 @@ textarea{min-height:88px;resize:vertical}.row2{display:grid;grid-template-column
    ]
  };
 
+ ACTION_MESSAGES.daily.push(
+   ['🌷 Tiny health admin complete','Biscuits has approved a post-check-in cuddle break.','wave'],
+   ['🧸 Bear committee informed','Your little check-in has been filed under: doing your best.','stretch']
+ );
+ ACTION_MESSAGES.food.push(
+   ['🍑 Meal evidence received','No judgement. Only clues, snacks and one suspicious cat.','pounce'],
+   ['🎀 Tiny detective moment','Future Cloe now has another clue to compare.','wave']
+ );
+ ACTION_MESSAGES.flare.push(
+   ['🌙 Logged and released','You can hand the details over to the app now. Soft mode encouraged.','loaf'],
+   ['💗 Biscuits is sitting with you','Rubbish-body paperwork completed. No gold stars for suffering required.','stretch']
+ );
+
  const BISCUITS_POSES={
    happy:{emoji:'😸',cls:'pose-happy'},
    love:{emoji:'😽',cls:'pose-love'},
@@ -1129,6 +1194,10 @@ textarea{min-height:88px;resize:vertical}.row2{display:grid;grid-template-column
    shock:{emoji:'🙀',cls:'pose-shock'},
    sleep:{emoji:'😴',cls:'pose-sleep'},
    inspect:{emoji:'😼',cls:'pose-inspect'},
+   stretch:{emoji:'🐈',cls:'pose-stretch'},
+   pounce:{emoji:'🐈',cls:'pose-pounce'},
+   wave:{emoji:'😺',cls:'pose-wave'},
+   loaf:{emoji:'🐈',cls:'pose-loaf'},
    normal:{emoji:'🐈',cls:''}
  };
 
@@ -1282,7 +1351,8 @@ textarea{min-height:88px;resize:vertical}.row2{display:grid;grid-template-column
      mm.classList.remove('show');
      mt.setAttribute('aria-expanded','false');
    }
-   if(id==='home'){refreshCoreHome();renderHomeRecent();renderGameBits();}
+   if(id==='home'){refreshCoreHome();renderHomeRecent();renderGameBits();renderCycleTracker();}
+   if(id==='daily')syncCycleIntoDailyForm();
    if(id==='patterns')renderCluesPanel();
    if(id==='data')renderDataDashboard(streak());
    if(mt){
@@ -2208,6 +2278,26 @@ textarea{min-height:88px;resize:vertical}.row2{display:grid;grid-template-column
    cat.dataset.present=present?'1':'0';
  }
 
+
+ let biscuitsIdleTimer=null;
+ function scheduleBiscuitsIdleMoment(){
+   clearTimeout(biscuitsIdleTimer);
+   biscuitsIdleTimer=setTimeout(()=>{
+     const cat=document.getElementById('biscuitsMascot');
+     if(cat&&cat.dataset.present!=='0'){
+       const moments=[
+         ['stretch','Biscuits has performed one enormous stretch. Productivity complete.'],
+         ['loaf','Biscuits has entered loaf mode. Please respect the geometry.'],
+         ['wave','Biscuits checked in on you and then immediately got distracted.'],
+         ['inspect','Biscuits is conducting a completely unqualified wellness inspection.']
+       ];
+       const m=rarePick(moments);
+       animateBiscuits(m[0],m[1]);
+       if(Math.random()<.35)floatEmoji(rarePick(['🐾','✨','💗']),3);
+     }
+     scheduleBiscuitsIdleMoment();
+   },45000+Math.random()*75000);
+ }
  function scheduleBiscuits(){
    const cat=document.getElementById('biscuitsMascot');if(!cat)return;
    clearTimeout(scheduleBiscuits._t);
@@ -2302,6 +2392,7 @@ textarea{min-height:88px;resize:vertical}.row2{display:grid;grid-template-column
    renderMatchaStamps();
    renderWeeklyPostcard();
    renderSoftMode();
+   renderCycleTracker();
    maybeAwardStreakPass();
    renderLevel();
    renderBiscuitsJob();
@@ -2324,6 +2415,81 @@ textarea{min-height:88px;resize:vertical}.row2{display:grid;grid-template-column
    return {daily,food,flare};
  }
 
+
+ function parseLocalDay(v){
+   if(!v)return null;
+   const p=String(v).split('-').map(Number);
+   if(p.length!==3||p.some(x=>!Number.isFinite(x)))return null;
+   return new Date(p[0],p[1]-1,p[2],0,0,0,0);
+ }
+ function cycleInfo(){
+   const start=parseLocalDay(state.cycle?.lastPeriodStart);
+   if(!start)return null;
+   const now=parseLocalDay(today());
+   const len=Math.max(20,Math.min(60,Number(state.cycle?.cycleLength)||28));
+   const periodLen=Math.max(2,Math.min(10,Number(state.cycle?.periodLength)||5));
+   let elapsed=Math.floor((now-start)/86400000);
+   if(elapsed<0)return null;
+   const day=(elapsed%len)+1;
+   const ovDay=Math.max(periodLen+4,len-14);
+   let phase='Follicular';
+   if(day<=periodLen)phase='Period';
+   else if(day>=ovDay-1&&day<=ovDay+1)phase='Ovulation-ish';
+   else if(day>ovDay+1)phase='Luteal';
+   const nextIn=len-day+1;
+   return {day,phase,len,periodLen,ovDay,nextIn};
+ }
+ const CYCLE_HINTS={
+   'Period':['Tired','Crampy','Bloating','Lower mood','More sensitive'],
+   'Follicular':['Energy may lift','Mood may feel lighter','Less bloated','Libido may rise'],
+   'Ovulation-ish':['Horny / higher libido','More social','More energy','Possible twinges','Some bloating'],
+   'Luteal':['Irritable','Sad / teary','Tired','Bloating','Cravings','Lower patience']
+ };
+ function renderCycleTracker(){
+   const phase=document.getElementById('cyclePhase');
+   const estimate=document.getElementById('cycleEstimate');
+   const badge=document.getElementById('cycleDayBadge');
+   const hints=document.getElementById('cycleHints');
+   const startInput=document.getElementById('cycleLastStart');
+   const lenInput=document.getElementById('cycleLength');
+   const periodInput=document.getElementById('cyclePeriodLength');
+   if(startInput&&startInput!==document.activeElement)startInput.value=state.cycle?.lastPeriodStart||'';
+   if(lenInput&&lenInput!==document.activeElement)lenInput.value=state.cycle?.cycleLength||28;
+   if(periodInput&&periodInput!==document.activeElement)periodInput.value=state.cycle?.periodLength||5;
+   const info=cycleInfo();
+   if(!info){
+     if(phase)phase.textContent='Add period start to begin';
+     if(estimate)estimate.textContent='Then I can show an approximate cycle day and phase.';
+     if(badge)badge.textContent='Day ?';
+     if(hints)hints.innerHTML='';
+     return;
+   }
+   if(phase)phase.textContent=info.phase;
+   if(badge)badge.textContent='Day '+info.day;
+   if(estimate)estimate.textContent=info.nextIn===1?'Estimated next period: around tomorrow':`Estimated next period: about ${info.nextIn} days`;
+   if(hints)hints.innerHTML=(CYCLE_HINTS[info.phase]||[]).map(x=>`<span class="cycle-hint">${escapeHtml(x)}</span>`).join('');
+ }
+ function syncCycleIntoDailyForm(){
+   const info=cycleInfo();
+   const form=document.getElementById('dailyForm');
+   if(!info||!form)return;
+   const day=form.querySelector('[name="cycleDay"]');
+   const stage=form.querySelector('[name="cycleStage"]');
+   if(day&&!day.value)day.value=String(info.day);
+   if(stage&&(!stage.value||stage.value==='Unknown')){
+     const mapped=info.phase==='Ovulation-ish'?'Ovulation':info.phase;
+     if([...stage.options].some(o=>o.value===mapped||o.text===mapped))stage.value=mapped;
+   }
+ }
+ function saveCycleSettings(){
+   const start=document.getElementById('cycleLastStart')?.value||'';
+   const len=Math.max(20,Math.min(60,Number(document.getElementById('cycleLength')?.value)||28));
+   const periodLen=Math.max(2,Math.min(10,Number(document.getElementById('cyclePeriodLength')?.value)||5));
+   state.cycle={lastPeriodStart:start,cycleLength:len,periodLength:periodLen};
+   persist();
+   renderCycleTracker();
+   syncCycleIntoDailyForm();
+ }
  function refreshCoreHome(){
    const daily=Array.isArray(state.daily)?state.daily:[];
    const food=Array.isArray(state.food)?state.food:[];
@@ -2751,7 +2917,15 @@ textarea{min-height:88px;resize:vertical}.row2{display:grid;grid-template-column
 
 
  const biscuitsMascot=document.getElementById('biscuitsMascot');
+ let biscuitsTapCount=0;
  if(biscuitsMascot)biscuitsMascot.addEventListener('click',()=>{
+   biscuitsTapCount++;
+   if(biscuitsTapCount%5===0){
+     animateBiscuits('pounce','FIVE TAPS. Biscuits has activated maximum silliness.');
+     floatEmoji('💗',7);
+     setTimeout(()=>floatEmoji('🐾',5),250);
+     return;
+   }
    if(biscuitsMascot.dataset.present==='0'){
      setBiscuitsPresence(true);
      animateBiscuits('shock','He was technically away, but heard you tapping and came back to complain.');
@@ -2840,6 +3014,20 @@ textarea{min-height:88px;resize:vertical}.row2{display:grid;grid-template-column
    });
  }
  startFunCountdownRotation();
+
+ const cycleLastStart=document.getElementById('cycleLastStart');
+ const cycleLength=document.getElementById('cycleLength');
+ const cyclePeriodLength=document.getElementById('cyclePeriodLength');
+ [cycleLastStart,cycleLength,cyclePeriodLength].forEach(el=>el?.addEventListener('change',saveCycleSettings));
+ document.getElementById('periodStartedToday')?.addEventListener('click',()=>{
+   state.cycle={...(state.cycle||{}),lastPeriodStart:today()};
+   persist();
+   renderCycleTracker();
+   syncCycleIntoDailyForm();
+   cuteAction('daily','Period start saved. Biscuits has updated the moon paperwork. 🌙');
+ });
+ renderCycleTracker();
+ scheduleBiscuitsIdleMoment();
 
   initBiscuitsDay();
 
