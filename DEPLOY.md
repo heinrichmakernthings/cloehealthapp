@@ -1,16 +1,9 @@
 # Deployment
 
-## Netlify
-Deploy the repository root as a static site.
+Cloudflare Workers with static assets + D1. See `wrangler.jsonc`.
 
-## Cloudflare Pages
-- Framework preset: None
-- Build command: leave blank
-- Build output directory: `/` or repository root depending on the UI
-- Root file: `index.html`
+1. Cloudflare dashboard → Workers & Pages → `cloehealthapp` → Settings → Build → Connect to Git.
+2. Repo `heinrichmakernthings/cloehealthapp`, branch `main`. Build command: blank. Deploy command: `npx wrangler deploy`.
+3. Push to `main` to deploy.
 
-## GitHub Pages
-This can also run directly from the repository root with GitHub Pages enabled.
-
-## Important
-App data lives in browser localStorage. Changing the deployed domain creates a new browser storage origin. Use the app's backup/restore feature when moving to a different domain.
+Keep the worker name and the `*.workers.dev` address the same — Cloe's on-device data is tied to that address.

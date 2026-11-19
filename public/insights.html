@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Cloe's clues · Insights</title>
+<script src="/vendor/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#fff8fb;--card:#fff;--ink:#3f3940;--muted:#827785;--line:#eadde3;--soft:#faf9f6;--pink:#ffddea;--sage2:#edf7f0;--red:#a95f67;
+  --shadow:0 10px 28px rgba(85,60,80,.08);
+  /* chart roles (validated reference palette, light) */
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--flare:#e34948;--seq:#2a78d6;--grid:#efe7eb;
+}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-rounded,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,select{font:inherit}button{cursor:pointer}
+.app{max-width:820px;margin:0 auto;padding:18px 15px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:28px;margin:4px 0}.sub{color:var(--muted);margin:0 0 10px;line-height:1.45}
+a.back{color:var(--ink);font-weight:700;text-decoration:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-size:14px;white-space:nowrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:17px;margin-top:12px}
+.card h2{margin:0 0 4px;font-size:19px}.helper{color:var(--muted);font-size:14px;line-height:1.45;margin:0 0 12px}
+.filters{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font-weight:700;font-size:13px;color:var(--ink)}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tile{border:1px solid var(--line);border-radius:16px;padding:12px;background:var(--soft)}
+.tile b{display:block;font-size:24px}.tile span{font-size:12px;color:var(--muted)}
+.chartbox{position:relative;height:260px}
+.metricpick{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.metricpick .chip{font-size:12px;padding:6px 10px}
+.metricpick .chip .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.finding{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.finding:last-child{border-bottom:0}
+.finding .ic{font-size:20px;line-height:1.2}.finding b{display:block;font-size:14px}.finding small{color:var(--muted);font-size:12px;line-height:1.4;display:block;margin-top:2px}
+.meter{height:6px;background:var(--grid);border-radius:4px;margin-top:6px;overflow:hidden;max-width:220px}.meter i{display:block;height:100%;background:var(--seq);border-radius:4px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:700;font-size:12px}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--muted)}
+.tag.strong{background:var(--pink);color:var(--ink)}
+.empty{color:var(--muted);font-size:14px;padding:6px 0}
+.btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;font-weight:700;color:var(--ink)}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:10px}
+.pinbox{max-width:320px;margin:50px auto;text-align:center}.pinbox input{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;text-align:center;font-size:22px;letter-spacing:.3em}
+.toggle-table{font-size:12px;font-weight:700;color:var(--muted);background:none;border:0;padding:4px 0;text-decoration:underline}
+#docSummary h3{font-size:15px;margin:16px 0 6px}
+#docSummary ul{margin:0;padding-left:18px;font-size:14px;line-height:1.5}
+@media(max-width:560px){.tiles{grid-template-columns:repeat(2,1fr)}.chartbox{height:230px}}
+@media print{
+  body{background:#fff}.app{max-width:none;padding:0}
+  .card{box-shadow:none;border:0;padding:0;margin:0}
+  body.printing .app > *:not(#doctorCard){display:none!important}
+  body.printing #doctorCard .noprint{display:none!important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div>
+      <div class="eyebrow" id="sourceLabel">Cloe's clues</div>
+      <h1>✨ Insights</h1>
+    </div>
+    <a class="back" href="/" id="backLink">← Back to app</a>
+  </div>
+  <p class="sub">Charts and patterns from everything logged. These are clues to discuss with a doctor — not a diagnosis. The more days logged, the more reliable they get.</p>
+
+  <div id="pinGate" class="card pinbox" style="display:none">
+    <p class="helper">Enter Sam's PIN to view the cloud copy.</p>
+    <input id="pin" type="password" inputmode="numeric">
+    <button class="btn primary" id="pinBtn" style="width:100%;margin-top:10px">View</button>
+    <div class="helper" id="pinErr" style="color:var(--red);margin-top:8px"></div>
+  </div>
+
+  <div id="content" style="display:none">
+    <div class="filters" role="group" aria-label="Date range">
+      <button class="chip" data-range="30">Last 30 days</button>
+      <button class="chip on" data-range="90">Last 90 days</button>
+      <button class="chip" data-range="0">Everything</button>
+    </div>
+
+    <div class="card">
+      <div class="tiles">
+        <div class="tile"><b id="tDays">–</b><span>days checked in</span></div>
+        <div class="tile"><b id="tFlares">–</b><span>flare logs</span></div>
+        <div class="tile"><b id="tGood">–</b><span>good / okay / bad days</span></div>
+        <div class="tile"><b id="tFood">–</b><span>meals logged</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🧠 Smart findings</h2>
+      <p class="helper">The strongest patterns in the data right now, in plain English.</p>
+      <div id="findings"></div>
+    </div>
+
+    <div class="card">
+      <h2>📈 How symptoms have moved</h2>
+      <p class="helper">Daily check-in scores (0–10), smoothed over 7 days. Red triangles are days with a flare log. Pick up to 3.</p>
+      <div class="metricpick" id="trendPick"></div>
+      <div class="chartbox"><canvas id="trendChart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h2>🌙 Cycle patterns</h2>
+      <p class="helper">Average check-in scores in each phase of her cycle, and how often flares happen per day in each phase.</p>
+      <div class="metricpick" id="cyclePick"></div>
+      <div class="chartbox"><canvas id="cycleChart"></canvas></div>
+      <div class="chartbox" style="height:200px;margin-top:14px"><canvas id="cycleFlareChart"></canvas></div>
+      <div class="note" id="cycleNote"></div>
+    </div>
+
+    <div class="card">
+      <h2>🍜 Possible food triggers</h2>
+      <p class="helper">For each food or flag: how often a meal was followed by symptoms (logged symptoms, a score of 4+, or a flare within 24 hours), compared with meals without it.</p>
+      <div id="foodTable"></div>
+      <div class="note">“Early hint” = fewer than 8 meals, so treat it as something to keep watching rather than a conclusion.</div>
+    </div>
+
+    <div class="card">
+      <h2>⚡ Flare details</h2>
+      <p class="helper">When flares happen and what they look like.</p>
+      <div class="chartbox" style="height:200px"><canvas id="flareTimeChart"></canvas></div>
+      <div id="flareFacts" style="margin-top:12px"></div>
+    </div>
+
+    <div class="card" id="doctorCard">
+      <div class="noprint" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <div><h2>🩺 Doctor summary</h2><p class="helper" style="margin:0">A one-page summary to take to appointments.</p></div>
+        <div style="display:flex;gap:8px"><button class="btn" id="copySummary">Copy text</button><button class="btn primary" id="printSummary">Print / save PDF</button></div>
+      </div>
+      <div id="docSummary"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const esc=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const SERIES=[css('--s1'),css('--s2'),css('--s3')];
+
+const DAILY_METRICS=[['energy','Energy',true],['pain','Pelvic / abdominal pain'],['bloating','Bloating'],['nausea','Nausea'],['dizziness','Dizziness / faintness'],['headache','Headache'],['cramps','Muscle cramps'],['brainFog','Brain fog'],['stress','Stress'],['sleepQuality','Sleep quality',true]];
+const FLARE_METRICS=[['dizzy','Faint / dizzy'],['shaking','Shaking'],['nausea','Nausea'],['disorientation','Disorientation'],['pain','Pain'],['bloating','Bloating'],['headache','Headache'],['heart','Heart racing'],['cramps','Muscle cramps']];
+const LABEL=Object.fromEntries(DAILY_METRICS.map(m=>[m[0],m[1]]));
+LABEL.sleepHours='Sleep hours';LABEL.hydration='Hydration';LABEL.flares='Flares';LABEL.badDay='How bad the day felt';
+const GOOD_HIGH=new Set(['energy','sleepQuality','sleepHours','hydration']);
+const STAGES=['Period','Follicular','Ovulation','Luteal'];
+
+let RAW=null, RANGE=90, trendSel=['pain','bloating','energy'], cycleSel=['pain','bloating','energy'];
+const charts={};
+
+// ---------- load data ----------
+const params=new URLSearchParams(location.search);
+const isAdmin=params.get('view')==='admin';
+if(isAdmin){$('backLink').href='/admin';$('backLink').textContent='← Sam\'s controls';$('sourceLabel').textContent='Cloud copy · Sam\'s view'}
+async function load(){
+  if(isAdmin){
+    const pin=sessionStorage.getItem('cozyAdminPin');
+    if(!pin){$('pinGate').style.display='block';return}
+    const r=await fetch('/api/admin/state',{headers:{'x-admin-pin':pin},cache:'no-store'});
+    if(!r.ok){sessionStorage.removeItem('cozyAdminPin');$('pinGate').style.display='block';$('pinErr').textContent=r.status===401?'Wrong PIN':'Could not load';return}
+    const j=await r.json(); RAW=j.data||{daily:[],food:[],flare:[]};
+  }else{
+    try{RAW=JSON.parse(localStorage.getItem('cloeHealthQuestV1')||'null')}catch(e){}
+    const total=RAW?['daily','food','flare'].reduce((n,k)=>n+((RAW[k]||[]).length),0):0;
+    const key=localStorage.getItem('cloeSyncKey');
+    if(!total&&key){
+      try{const r=await fetch('/api/state',{headers:{'x-sync-key':key}});if(r.ok){const j=await r.json();if(j.data)RAW=j.data}}catch(e){}
+    }
+    RAW=RAW||{daily:[],food:[],flare:[]};
+  }
+  $('pinGate').style.display='none';$('content').style.display='block';
+  renderAll();
+}
+$('pinBtn').onclick=()=>{sessionStorage.setItem('cozyAdminPin',$('pin').value.trim());$('pinErr').textContent='';load()};
+$('pin').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinBtn').click()});
+
+document.querySelectorAll('[data-range]').forEach(b=>b.onclick=()=>{
+  RANGE=Number(b.dataset.range);
+  document.querySelectorAll('[data-range]').forEach(x=>x.classList.toggle('on',x===b));
+  renderAll();
+});
+
+// ---------- helpers ----------
+const num=v=>{if(v===''||v==null)return null;const n=Number(v);return Number.isFinite(n)?n:null};
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const parseDay=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s||'');return m?new Date(+m[1],+m[2]-1,+m[3],12):null};
+const addDays=(s,n)=>{const d=parseDay(s);d.setDate(d.getDate()+n);return ymd(d)};
+const dayDiff=(a,b)=>Math.round((parseDay(b)-parseDay(a))/86400000);
+const ts=(date,time)=>{const d=parseDay(date);if(!d)return null;const m=/^(\d{1,2}):(\d{2})/.exec(time||'');d.setHours(m?+m[1]:12,m?+m[2]:0,0,0);return d.getTime()};
+const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+const cap=s=>String(s).charAt(0).toUpperCase()+String(s).slice(1);
+const fmt=(v,d=1)=>v==null?'–':v.toFixed(d);
+const pct=v=>v==null?'–':Math.round(v*100)+'%';
+function pearson(xs,ys){
+  const n=xs.length;if(n<3)return null;
+  const mx=mean(xs),my=mean(ys);let sxy=0,sx=0,sy=0;
+  for(let i=0;i<n;i++){const a=xs[i]-mx,b=ys[i]-my;sxy+=a*b;sx+=a*a;sy+=b*b}
+  if(!sx||!sy)return null;return sxy/Math.sqrt(sx*sy);
+}
+function inRange(date){
+  if(!RANGE)return true;
+  const cut=ymd(new Date(Date.now()-(RANGE-1)*86400000));
+  return date>=cut;
+}
+
+// cycle stage for a date: logged stage > logged cycle day > estimate from last period start
+function makeStageFinder(raw,daysByDate){
+  const len=Math.max(20,Math.min(60,Number(raw.cycle?.cycleLength)||28));
+  const pLen=Math.max(2,Math.min(10,Number(raw.cycle?.periodLength)||5));
+  const start=raw.cycle?.lastPeriodStart;
+  const fromCycleDay=cd=>{if(!cd)return null;const ov=len-14;if(cd<=pLen)return 'Period';if(cd<ov-1)return 'Follicular';if(cd<=ov+1)return 'Ovulation';return 'Luteal'};
+  const normalise=s=>{s=String(s||'');if(/period/i.test(s))return 'Period';if(/follic/i.test(s))return 'Follicular';if(/ovul/i.test(s))return 'Ovulation';if(/lute/i.test(s))return 'Luteal';return null};
+  return function(date,loggedStage){
+    let st=normalise(loggedStage); if(st)return {stage:st,est:false,cd:null};
+    const d=daysByDate[date];
+    if(d){st=normalise(d.cycleStage);const cd=num(d.cycleDay);if(st)return {stage:st,est:false,cd};if(cd)return {stage:fromCycleDay(cd),est:false,cd}}
+    if(start&&parseDay(start)){const diff=dayDiff(start,date);const cd=((diff%len)+len)%len+1;return {stage:fromCycleDay(cd),est:true,cd}}
+    return {stage:null,est:false,cd:null};
+  };
+}
+
+// ---------- build the dataset ----------
+function build(){
+  const raw=RAW;
+  const allDaily=(raw.daily||[]).filter(x=>x&&x.date);
+  const byDate={};
+  allDaily.forEach(x=>{ (byDate[x.date]=byDate[x.date]||[]).push(x) });
+  const dayRows={};
+  Object.entries(byDate).forEach(([date,rows])=>{
+    const r={date,cycleStage:rows.find(x=>x.cycleStage&&x.cycleStage!=='Unknown')?.cycleStage,cycleDay:rows.map(x=>num(x.cycleDay)).find(v=>v)};
+    DAILY_METRICS.forEach(([k])=>{const v=rows.map(x=>num(x[k])).filter(v=>v!=null);r[k]=v.length?mean(v):null});
+    const sh=rows.map(x=>num(x.sleepHours)).filter(v=>v!=null&&v>0);r.sleepHours=sh.length?mean(sh):null;
+    const hy=rows.map(x=>({Low:0,Okay:1,Good:2})[x.hydration]).filter(v=>v!=null);r.hydration=hy.length?mean(hy):null;
+    const ov=rows.map(x=>/bad/i.test(x.overall)?2:/good/i.test(x.overall)?0:/okay/i.test(x.overall)?1:null).filter(v=>v!=null);r.badDay=ov.length?mean(ov):null;
+    r.overall=rows[rows.length-1].overall||'';
+    dayRows[date]=r;
+  });
+  const stageOf=makeStageFinder(raw,dayRows);
+  const flaresAll=(raw.flare||[]).filter(x=>x&&x.date).map(x=>({...x,_t:ts(x.date,x.time),_st:stageOf(x.date,x.cycleStage)}));
+  const flareCount={};flaresAll.forEach(f=>flareCount[f.date]=(flareCount[f.date]||0)+1);
+  Object.values(dayRows).forEach(r=>{r.flares=flareCount[r.date]||0;r._st=stageOf(r.date,r.cycleStage)});
+  const foodAll=(raw.food||[]).filter(x=>x&&x.date).map(x=>({...x,_t:ts(x.date,x.time)}));
+  return {
+    days:Object.values(dayRows).filter(r=>inRange(r.date)).sort((a,b)=>a.date.localeCompare(b.date)),
+    dayMap:dayRows,
+    flares:flaresAll.filter(f=>inRange(f.date)),
+    flaresAll,
+    food:foodAll.filter(f=>inRange(f.date)),
+    stageOf
+  };
+}
+
+// ---------- correlations ----------
+function correlations(D){
+  const vars=[...DAILY_METRICS.map(m=>m[0]),'sleepHours','hydration','flares','badDay'];
+  const out=[];
+  const pairsSame=[];
+  for(let i=0;i<vars.length;i++)for(let j=i+1;j<vars.length;j++)pairsSame.push([vars[i],vars[j],0]);
+  // lagged: today's X vs tomorrow's Y
+  const leads=['sleepHours','sleepQuality','stress','hydration'];
+  const follows=['pain','bloating','nausea','headache','dizziness','brainFog','energy','flares','badDay'];
+  const pairsLag=[];leads.forEach(a=>follows.forEach(b=>{if(a!==b)pairsLag.push([a,b,1])}));
+  [...pairsSame,...pairsLag].forEach(([a,b,lag])=>{
+    const xs=[],ys=[];
+    D.days.forEach(r=>{
+      const other=lag?D.dayMap[addDays(r.date,1)]:r;
+      if(!other)return;
+      const x=r[a],y=other[b];
+      if(x!=null&&y!=null){xs.push(x);ys.push(y)}
+    });
+    if(xs.length<10)return;
+    // "how bad the day felt" only matters against causes, not against the symptoms that make up a bad day
+    if((a==='badDay'||b==='badDay')&&!['sleepHours','sleepQuality','stress','hydration','flares'].includes(a==='badDay'?b:a))return;
+    const rr=pearson(xs,ys);if(rr==null||Math.abs(rr)<0.3)return;
+    out.push({a,b,lag,r:rr,n:xs.length});
+  });
+  // don't double-report a lagged pair if the same-day one is stronger
+  return out.sort((x,y)=>Math.abs(y.r)-Math.abs(x.r));
+}
+function corrSentence(c){
+  const CAUSE=['sleepHours','sleepQuality','stress','hydration'];
+  if(!c.lag&&CAUSE.includes(c.b)&&!CAUSE.includes(c.a))c={...c,a:c.b,b:c.a};
+  const A=LABEL[c.a].toLowerCase(),B=LABEL[c.b].toLowerCase();
+  const dir=c.r>0;
+  const strength=Math.abs(c.r)>=0.5?'strongly':'noticeably';
+  const word=(k,up)=>{
+    if(k==='sleepHours')return up?'more sleep':'less sleep';
+    if(k==='hydration')return up?'better hydration':'lower hydration';
+    if(k==='flares')return up?'more flares':'fewer flares';
+    if(k==='badDay')return up?'worse days overall':'better days overall';
+    return (up?'higher ':'lower ')+LABEL[k].toLowerCase();
+  };
+  const lead=word(c.a,true);
+  const fol=word(c.b,dir);
+  return c.lag
+    ? `After days with ${lead}, the next day tends to bring ${fol}`
+    : `Days with ${lead} ${strength} tend to come with ${fol}`;
+}
+
+// ---------- food ----------
+function tokens(text){
+  return String(text||'').toLowerCase()
+    .split(/,|\+|&|\/|;|\n|\band\b|\bwith\b/)
+    .map(s=>s.replace(/\b(some|a|an|the|bit of|little|of|small|large|big|bowl|cup|slice|slices|portion)\b/g,' ').replace(/[^a-zÀ-ɏ\s'-]/g,' ').replace(/\s+/g,' ').trim())
+    .filter(s=>s.length>=3&&s.length<=30);
+}
+function foodTriggers(D){
+  const flareTimes=D.flaresAll.map(f=>f._t).filter(Boolean);
+  const meals=D.food.map(m=>{
+    const scores=['bloating','cramps','diarrhoea','nausea'].map(k=>num(m[k])||0);
+    const flareAfter=m._t?flareTimes.some(t=>t>=m._t&&t-m._t<=24*3600000):false;
+    const bad=m.symptoms==='Yes'||Math.max(...scores)>=4||flareAfter;
+    const items=new Set([...(Array.isArray(m.flags)?m.flags.map(f=>String(f).toLowerCase()):[]),...tokens(m.food)]);
+    return {bad,items};
+  });
+  if(meals.length<5)return {rows:[],meals:meals.length,base:null};
+  const base=meals.filter(m=>m.bad).length/meals.length;
+  const counts={};
+  meals.forEach(m=>m.items.forEach(it=>{const c=counts[it]=counts[it]||{n:0,bad:0};c.n++;if(m.bad)c.bad++}));
+  const rows=Object.entries(counts).filter(([,c])=>c.n>=3).map(([item,c])=>{
+    const withoutN=meals.length-c.n, withoutBad=meals.filter(m=>m.bad).length-c.bad;
+    const rateWith=c.bad/c.n, rateWithout=withoutN?withoutBad/withoutN:null;
+    const lift=rateWithout?rateWith/rateWithout:(rateWith>0?Infinity:null);
+    return {item,n:c.n,rateWith,rateWithout,lift};
+  }).filter(r=>r.rateWithout!=null).sort((a,b)=>(b.lift-a.lift)||(b.n-a.n));
+  return {rows,meals:meals.length,base};
+}
+
+// ---------- charts ----------
+function baseOpts(extra={}){
+  return Object.assign({
+    responsive:true,maintainAspectRatio:false,animation:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:8,color:css('--ink'),font:{size:12}}},
+      tooltip:{backgroundColor:'#3f3940',padding:10,cornerRadius:10,titleFont:{weight:'700'}}},
+    scales:{x:{grid:{display:false},ticks:{color:css('--muted'),maxRotation:0,autoSkipPadding:14}},
+            y:{grid:{color:css('--grid')},border:{display:false},ticks:{color:css('--muted')}}}
+  },extra);
+}
+function draw(id,config){
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart($(id),config);
+}
+function picker(elId,sel,onChange){
+  const el=$(elId);
+  el.innerHTML=DAILY_METRICS.map(([k,l])=>{
+    const i=sel.indexOf(k);
+    return `<button type="button" class="chip ${i>=0?'on':''}" data-k="${k}">${i>=0?`<span class="dot" style="background:${SERIES[i]}"></span>`:''}${esc(l)}</button>`;
+  }).join('');
+  el.onclick=e=>{
+    const b=e.target.closest('[data-k]');if(!b)return;const k=b.dataset.k;const i=sel.indexOf(k);
+    if(i>=0){if(sel.length>1)sel.splice(i,1)}else{if(sel.length>=3)sel.shift();sel.push(k)}
+    onChange();
+  };
+}
+
+function renderTrend(D){
+  picker('trendPick',trendSel,()=>renderTrend(D));
+  if(!D.days.length){draw('trendChart',{type:'line',data:{labels:[],datasets:[]},options:baseOpts()});return}
+  const first=D.days[0].date,last=D.days[D.days.length-1].date;
+  const labels=[];for(let d=first;d<=last;d=addDays(d,1))labels.push(d);
+  const map=D.dayMap;
+  const ds=trendSel.map((k,i)=>({
+    label:LABEL[k],
+    data:labels.map((d,idx)=>{const w=[];for(let j=Math.max(0,idx-6);j<=idx;j++){const r=map[labels[j]];if(r&&r[k]!=null)w.push(r[k])}return w.length?+mean(w).toFixed(2):null}),
+    borderColor:SERIES[i],backgroundColor:SERIES[i],borderWidth:2,pointRadius:0,pointHoverRadius:5,tension:.35,spanGaps:true
+  }));
+  const fl={};D.flares.forEach(f=>fl[f.date]=(fl[f.date]||0)+1);
+  ds.push({label:'Flare logged',type:'scatter',data:labels.map((d)=>fl[d]?10.6:null),pointStyle:'triangle',pointRadius:6,pointHoverRadius:8,
+    borderColor:css('--flare'),backgroundColor:css('--flare'),showLine:false});
+  draw('trendChart',{type:'line',data:{labels:labels.map(d=>parseDay(d).toLocaleDateString('en-GB',{day:'numeric',month:'short'})),datasets:ds},
+    options:baseOpts({scales:{x:{grid:{display:false},ticks:{color:css('--muted'),maxRotation:0,autoSkipPadding:18}},y:{min:0,max:11,grid:{color:css('--grid')},border:{display:false},ticks:{color:css('--muted'),stepSize:2,callback:v=>v<=10?v:''}}},
+      plugins:{...baseOpts().plugins,tooltip:{...baseOpts().plugins.tooltip,callbacks:{label:c=>c.dataset.label==='Flare logged'?` ${fl[labels[c.dataIndex]]} flare log${fl[labels[c.dataIndex]]>1?'s':''}`:` ${c.dataset.label}: ${c.parsed.y} (7-day avg)`}}}})});
+}
+
+function renderCycle(D){
+  picker('cyclePick',cycleSel,()=>renderCycle(D));
+  const known=D.days.filter(r=>r._st.stage);
+  const est=known.filter(r=>r._st.est).length;
+  const ds=cycleSel.map((k,i)=>({label:LABEL[k],data:STAGES.map(s=>{const v=known.filter(r=>r._st.stage===s&&r[k]!=null).map(r=>r[k]);return v.length?+mean(v).toFixed(1):null}),
+    backgroundColor:SERIES[i],borderRadius:4,borderSkipped:'bottom',maxBarThickness:28,borderColor:'#fff',borderWidth:{left:1,right:1}}));
+  draw('cycleChart',{type:'bar',data:{labels:STAGES,datasets:ds},options:baseOpts({scales:{x:{grid:{display:false},ticks:{color:css('--muted')}},y:{min:0,max:10,grid:{color:css('--grid')},border:{display:false},ticks:{color:css('--muted'),stepSize:2}}},
+    plugins:{...baseOpts().plugins,tooltip:{...baseOpts().plugins.tooltip,callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y} avg`}}}})});
+  const daysPer=STAGES.map(s=>known.filter(r=>r._st.stage===s).length);
+  const flPer=STAGES.map(s=>D.flares.filter(f=>f._st.stage===s).length);
+  const rate=STAGES.map((s,i)=>daysPer[i]?+(flPer[i]/daysPer[i]).toFixed(2):null);
+  draw('cycleFlareChart',{type:'bar',data:{labels:STAGES,datasets:[{label:'Flares per day in this phase',data:rate,backgroundColor:css('--flare'),borderRadius:4,borderSkipped:'bottom',maxBarThickness:36}]},
+    options:baseOpts({plugins:{legend:{display:false},title:{display:true,text:'Flares per day in each phase',color:css('--ink'),font:{size:13,weight:'700'},align:'start'},
+      tooltip:{...baseOpts().plugins.tooltip,callbacks:{label:c=>` ${flPer[c.dataIndex]} flares over ${daysPer[c.dataIndex]} days (${c.parsed.y} per day)`}}},
+      scales:{x:{grid:{display:false},ticks:{color:css('--muted')}},y:{beginAtZero:true,grid:{color:css('--grid')},border:{display:false},ticks:{color:css('--muted')}}}})});
+  $('cycleNote').textContent=!known.length?'No cycle info yet — fill in the cycle tracker or the cycle stage on check-ins to unlock this.'
+    :est?`${est} of ${known.length} days have their phase estimated from the last period start and usual cycle length, so treat those as approximate.`:'';
+  return {known,daysPer,flPer,rate};
+}
+
+function renderFlares(D){
+  const buckets=[['Night','0–6',0,6],['Morning','6–10',6,10],['Late morning','10–13',10,13],['Afternoon','13–17',13,17],['Evening','17–21',17,21],['Late','21–24',21,24]];
+  const counts=buckets.map(b=>D.flares.filter(f=>{const m=/^(\d{1,2})/.exec(f.time||'');if(!m)return false;const h=+m[1];return h>=b[2]&&h<b[3]}).length);
+  draw('flareTimeChart',{type:'bar',data:{labels:buckets.map(b=>b[0]),datasets:[{label:'Flare logs',data:counts,backgroundColor:css('--flare'),borderRadius:4,borderSkipped:'bottom',maxBarThickness:36}]},
+    options:baseOpts({plugins:{legend:{display:false},title:{display:true,text:'Time of day',color:css('--ink'),font:{size:13,weight:'700'},align:'start'},tooltip:{...baseOpts().plugins.tooltip,callbacks:{title:c=>`${buckets[c[0].dataIndex][0]} (${buckets[c[0].dataIndex][1]}h)`}}},
+      scales:{x:{grid:{display:false},ticks:{color:css('--muted')}},y:{beginAtZero:true,grid:{color:css('--grid')},border:{display:false},ticks:{color:css('--muted'),precision:0}}}})});
+  const F=D.flares;
+  if(!F.length){$('flareFacts').innerHTML='<div class="empty">No flares logged in this period 🌷</div>';return {}}
+  const avgDur=mean(F.map(f=>num(f.duration)).filter(v=>v!=null&&v>0));
+  const lastAte=F.map(f=>num(f.lastAte)).filter(v=>v!=null);
+  const sym=FLARE_METRICS.map(([k,l])=>{const v=F.map(f=>num(f[k])).filter(v=>v!=null);return {l,avg:mean(v),often:v.filter(x=>x>=4).length/F.length}}).filter(s=>s.avg!=null).sort((a,b)=>b.often-a.often);
+  const count=key=>{const c={};F.forEach(f=>{const v=String(f[key]||'').trim();if(v&&v!=='None')c[v]=(c[v]||0)+1});return Object.entries(c).sort((a,b)=>b[1]-a[1])};
+  const words=key=>{const c={};F.forEach(f=>tokens(f[key]).forEach(w=>c[w]=(c[w]||0)+1));return Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,5)};
+  const side=count('painSide'),helped=words('helped'),first=words('firstSymptom');
+  const longGap=lastAte.length?lastAte.filter(v=>v>=4).length/lastAte.length:null;
+  $('flareFacts').innerHTML=`<table>
+    <tr><th>Typical length</th><td class="num">${avgDur?Math.round(avgDur)+' min':'–'}</td></tr>
+    <tr><th>Hours since food (avg)</th><td class="num">${lastAte.length?fmt(mean(lastAte))+' h':'–'}${longGap!=null?` · ${pct(longGap)} were 4h+ after eating`:''}</td></tr>
+    <tr><th>Most common symptoms (4+/10)</th><td>${sym.slice(0,4).map(s=>`${esc(s.l)} <span class="tag">${pct(s.often)}</span>`).join(' ')||'–'}</td></tr>
+    <tr><th>First symptom noticed</th><td>${first.map(([w,n])=>`${esc(w)} (${n})`).join(', ')||'–'}</td></tr>
+    <tr><th>Pain location</th><td>${side.map(([w,n])=>`${esc(w)} (${n})`).join(', ')||'–'}</td></tr>
+    <tr><th>What helped</th><td>${helped.map(([w,n])=>`${esc(w)} (${n})`).join(', ')||'–'}</td></tr>
+  </table>`;
+  return {avgDur,lastAte,sym,side,helped,first,longGap};
+}
+
+function renderFood(D){
+  const ft=foodTriggers(D);
+  if(!ft.rows.length){$('foodTable').innerHTML=`<div class="empty">${ft.meals<5?`Needs at least 5 food logs (${ft.meals} so far).`:'No food or flag appears in 3+ meals yet.'}</div>`;return ft}
+  const top=ft.rows.slice(0,12);
+  $('foodTable').innerHTML=`<p class="helper" style="margin-top:-4px">Overall, ${pct(ft.base)} of ${ft.meals} meals were followed by symptoms.</p>
+  <table><thead><tr><th>Food / flag</th><th class="num">Meals</th><th class="num">Symptoms after</th><th class="num">Without it</th><th>Signal</th></tr></thead><tbody>
+  ${top.map(r=>{
+    const strong=r.n>=8&&r.lift>=1.5, hint=r.lift>=1.5;
+    const sig=hint?`<span class="tag ${strong?'strong':''}">${r.lift===Infinity?'always':(r.lift.toFixed(1)+'×')} ${strong?'· stronger signal':'· early hint'}</span>`:r.lift<=0.67?'<span class="tag">seems fine</span>':'<span class="tag">no clear link</span>';
+    return `<tr><td>${esc(cap(r.item))}</td><td class="num">${r.n}</td><td class="num">${pct(r.rateWith)}</td><td class="num">${pct(r.rateWithout)}</td><td>${sig}</td></tr>`;
+  }).join('')}</tbody></table>`;
+  return ft;
+}
+
+function renderTiles(D){
+  $('tDays').textContent=D.days.length;$('tFlares').textContent=D.flares.length;$('tFood').textContent=D.food.length;
+  const g=D.days.filter(r=>/good/i.test(r.overall)).length,o=D.days.filter(r=>/okay/i.test(r.overall)).length,b=D.days.filter(r=>/bad/i.test(r.overall)).length;
+  $('tGood').textContent=`${g} / ${o} / ${b}`;
+}
+
+function renderFindings(D,corr,cyc,ft){
+  const items=[];
+  // cycle
+  if(cyc.known.length>=14){
+    const rates=cyc.rate.map((r,i)=>({s:STAGES[i],r,d:cyc.daysPer[i]})).filter(x=>x.r!=null&&x.d>=3);
+    const avgRate=D.flares.length/Math.max(1,cyc.known.length);
+    const hi=rates.sort((a,b)=>b.r-a.r)[0];
+    if(hi&&avgRate>0&&hi.r>=avgRate*1.5)items.push({ic:'🌙',t:`Flares cluster in the ${hi.s.toLowerCase()} phase`,d:`${hi.r.toFixed(2)} flares per day vs ${avgRate.toFixed(2)} on average (${hi.d} days in that phase).`,w:Math.min(1,hi.r/avgRate/3)});
+    DAILY_METRICS.forEach(([k,l,good])=>{
+      const per=STAGES.map(s=>{const v=cyc.known.filter(r=>r._st.stage===s&&r[k]!=null).map(r=>r[k]);return {s,v:v.length>=3?mean(v):null}}).filter(x=>x.v!=null);
+      if(per.length<2)return;
+      const all=mean(per.map(x=>x.v));
+      const worst=per.sort((a,b)=>good?a.v-b.v:b.v-a.v)[0];
+      if(Math.abs(worst.v-all)>=1.5)items.push({ic:'🌙',t:`${l} is ${good?'lowest':'highest'} during the ${worst.s.toLowerCase()} phase`,d:`Average ${worst.v.toFixed(1)}/10 vs ${all.toFixed(1)} across all phases.`,w:Math.min(1,Math.abs(worst.v-all)/4)});
+    });
+  }
+  // correlations
+  const CAUSES=new Set(['sleepHours','sleepQuality','stress','hydration','flares']);
+  corr.slice(0,8).forEach(c=>items.push({ic:c.lag?'⏭️':'🔗',t:corrSentence(c),d:`Correlation ${c.r.toFixed(2)} over ${c.n} days. ${Math.abs(c.r)>=0.5?'Strong link.':'Moderate link.'}`,
+    w:Math.abs(c.r)*((CAUSES.has(c.a)||CAUSES.has(c.b))?1:0.6)}));
+  // food
+  (ft.rows||[]).filter(r=>r.lift>=1.5&&r.n>=4).slice(0,3).forEach(r=>items.push({ic:'🍜',t:`Symptoms are more likely after ${r.item}`,d:`${pct(r.rateWith)} of ${r.n} meals vs ${pct(r.rateWithout)} without it${r.n<8?' — early hint, keep logging':''}.`,w:Math.min(1,(r.lift-1)/3)*(r.n>=8?1:.7)}));
+  // sleep
+  items.sort((a,b)=>b.w-a.w);
+  const enough=D.days.length;
+  $('findings').innerHTML=items.length?items.slice(0,8).map(f=>`<div class="finding"><div class="ic">${f.ic}</div><div><b>${esc(f.t)}</b><small>${esc(f.d)}</small><div class="meter" aria-hidden="true"><i style="width:${Math.round(Math.max(.15,f.w)*100)}%"></i></div></div></div>`).join('')
+    :`<div class="empty">${enough<10?`Not enough data yet — patterns usually start showing after about 2 weeks of check-ins (${enough} day${enough===1?'':'s'} so far in this range).`:'No strong patterns in this date range yet. Try “Everything”.'}</div>`;
+  return items;
+}
+
+function renderDoctor(D,corr,cyc,ft,flareInfo,findings){
+  const first=D.days[0]?.date||D.flares[0]?.date, last=D.days[D.days.length-1]?.date;
+  const range=first?`${parseDay(first).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})} – ${parseDay(last||first).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`:'No data';
+  const symRows=DAILY_METRICS.map(([k,l,good])=>{const v=D.days.map(r=>r[k]).filter(v=>v!=null);if(!v.length)return null;return {l,avg:mean(v),hi:good?v.filter(x=>x<=3).length/v.length:v.filter(x=>x>=6).length/v.length,good}}).filter(Boolean);
+  const sleep=D.days.map(r=>r.sleepHours).filter(v=>v!=null);
+  const flareRows=[...D.flares].sort((a,b)=>(b._t||0)-(a._t||0)).slice(0,25);
+  const html=`
+    <p style="margin:8px 0 0"><b>Period covered:</b> ${esc(range)}<br>
+    <b>Logged:</b> ${D.days.length} daily check-ins · ${D.food.length} meals · ${D.flares.length} flare episodes${sleep.length?` · average sleep ${fmt(mean(sleep))} h`:''}</p>
+    <h3>Symptom scores (0–10, from daily check-ins)</h3>
+    ${symRows.length?`<table><thead><tr><th>Symptom</th><th class="num">Average</th><th class="num">Days ${'≥'}6 (or ≤3 for energy/sleep)</th></tr></thead><tbody>${symRows.map(s=>`<tr><td>${esc(s.l)}</td><td class="num">${fmt(s.avg)}</td><td class="num">${pct(s.hi)}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">No check-ins in this range.</div>'}
+    <h3>Patterns noticed</h3>
+    ${findings.length?`<ul>${findings.slice(0,8).map(f=>`<li>${esc(f.t)} — ${esc(f.d)}</li>`).join('')}</ul>`:'<div class="empty">Not enough data for patterns yet.</div>'}
+    ${flareInfo.sym?`<h3>Flare episodes</h3><ul>
+      ${flareInfo.avgDur?`<li>Typical duration about ${Math.round(flareInfo.avgDur)} minutes.</li>`:''}
+      ${flareInfo.lastAte?.length?`<li>On average ${fmt(mean(flareInfo.lastAte))} hours since last food${flareInfo.longGap!=null?` (${pct(flareInfo.longGap)} were 4+ hours after eating)`:''}.</li>`:''}
+      ${flareInfo.sym.length?`<li>Most frequent symptoms (scored 4+): ${flareInfo.sym.slice(0,5).map(s=>`${esc(s.l.toLowerCase())} (${pct(s.often)} of episodes)`).join(', ')}.</li>`:''}
+      ${flareInfo.side?.length?`<li>Pain location: ${flareInfo.side.map(([w,n])=>`${esc(w)} ×${n}`).join(', ')}.</li>`:''}
+      ${flareInfo.helped?.length?`<li>What helped: ${flareInfo.helped.map(([w])=>esc(w)).join(', ')}.</li>`:''}
+    </ul>
+    <table style="margin-top:8px"><thead><tr><th>Date</th><th>Time</th><th>First symptom</th><th class="num">Mins</th><th>Cycle phase</th><th>Doing</th></tr></thead><tbody>
+    ${flareRows.map(f=>`<tr><td>${esc(parseDay(f.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'}))}</td><td>${esc(f.time||'')}</td><td>${esc(f.firstSymptom||'')}</td><td class="num">${esc(f.duration||'')}</td><td>${esc(f._st.stage?f._st.stage+(f._st.est?' (est.)':''):'')}</td><td>${esc(f.activity||'')}</td></tr>`).join('')}
+    </tbody></table>${D.flares.length>25?`<div class="note">Showing the 25 most recent of ${D.flares.length}.</div>`:''}`:''}
+    ${(ft.rows||[]).filter(r=>r.lift>=1.5).length?`<h3>Foods to discuss</h3><ul>${ft.rows.filter(r=>r.lift>=1.5).slice(0,6).map(r=>`<li>${esc(cap(r.item))}: symptoms after ${pct(r.rateWith)} of ${r.n} meals vs ${pct(r.rateWithout)} otherwise.</li>`).join('')}</ul>`:''}
+    <h3>Questions to bring</h3>
+    <ul><li>Do these patterns suggest any tests worth doing?</li><li>Is the link with the cycle (if shown above) worth investigating further?</li><li>Should any foods above be trialled out, and for how long?</li></ul>
+    <div class="note">Self-tracked with Cloe's Cozy Club. Patterns are correlations from self-reported data, not a diagnosis. Generated ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}.</div>`;
+  $('docSummary').innerHTML=html;
+}
+$('printSummary').onclick=()=>{document.body.classList.add('printing');window.print();setTimeout(()=>document.body.classList.remove('printing'),500)};
+window.addEventListener('afterprint',()=>document.body.classList.remove('printing'));
+$('copySummary').onclick=async()=>{const t=$('docSummary').innerText;try{await navigator.clipboard.writeText(t);$('copySummary').textContent='Copied ✓'}catch(e){}};
+
+function renderAll(){
+  if(typeof Chart==='undefined'){$('findings').innerHTML='<div class="empty">Charts need an internet connection to load.</div>'}
+  const D=build();
+  renderTiles(D);
+  const corr=correlations(D);
+  let cyc={known:[],daysPer:[],flPer:[],rate:[]},ft={rows:[],meals:0},fi={};
+  try{if(typeof Chart!=='undefined')renderTrend(D)}catch(e){console.error(e)}
+  try{cyc=typeof Chart!=='undefined'?renderCycle(D):cyc}catch(e){console.error(e)}
+  try{ft=renderFood(D)}catch(e){console.error(e)}
+  try{fi=typeof Chart!=='undefined'?renderFlares(D):fi}catch(e){console.error(e)}
+  const findings=renderFindings(D,corr,cyc,ft);
+  renderDoctor(D,corr,cyc,ft,fi,findings);
+}
+
+load();
+})();
+</script>
+</body>
+</html>
