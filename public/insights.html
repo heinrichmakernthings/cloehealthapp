@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Cloe's clues · Insights</title>
 <script src="/vendor/chart.umd.min.js"></script>
 <style>
@@ -29,7 +31,8 @@ a.back{color:var(--ink);font-weight:700;text-decoration:none;border:1px solid va
 .tile{border:1px solid var(--line);border-radius:16px;padding:12px;background:var(--soft)}
 .tile b{display:block;font-size:24px}.tile span{font-size:12px;color:var(--muted)}
 .chartbox{position:relative;height:260px}
-.metricpick{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.metricpick{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;margin:0 -17px 10px;padding:2px 17px 4px;scrollbar-width:none}.metricpick::-webkit-scrollbar{display:none}
+.metricpick .chip{flex:0 0 auto;min-height:36px}
 .metricpick .chip{font-size:12px;padding:6px 10px}
 .metricpick .chip .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
 .finding{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
@@ -41,6 +44,17 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .tag{display:inline-block;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--muted)}
 .tag.strong{background:var(--pink);color:var(--ink)}
 .empty{color:var(--muted);font-size:14px;padding:6px 0}
+.foodlist{display:grid;gap:8px}
+.fooditem{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--soft)}
+.fi-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}.fi-top b{font-size:15px}
+.fi-row{display:grid;grid-template-columns:58px 1fr 38px;align-items:center;gap:8px;font-size:12px;color:var(--ink);margin-top:3px}
+.fi-row em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.fi-bar{height:8px;background:var(--grid);border-radius:4px;overflow:hidden}.fi-bar i{display:block;height:100%;background:var(--flare);border-radius:4px}
+.fi-row.muted{color:var(--muted)}.fi-row.muted .fi-bar i{background:#b9aeb6}
+.fooditem small{display:block;color:var(--muted);font-size:12px;margin-top:5px}
+.chip,.btn{min-height:40px}
+a.back{min-height:40px;display:inline-flex;align-items:center}
+@media(max-width:480px){h1{font-size:24px}.card{padding:15px}.chartbox{height:220px}}
 .btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;font-weight:700;color:var(--ink)}
 .btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
 .note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:10px}
@@ -106,7 +120,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 
     <div class="card">
       <h2>🌙 Cycle patterns</h2>
-      <p class="helper">Average check-in scores in each phase of her cycle, and how often flares happen per day in each phase.</p>
+      <p class="helper">Average check-in scores in each phase of the cycle, and how often flares happen per day in each phase.</p>
       <div class="metricpick" id="cyclePick"></div>
       <div class="chartbox"><canvas id="cycleChart"></canvas></div>
       <div class="chartbox" style="height:200px;margin-top:14px"><canvas id="cycleFlareChart"></canvas></div>
@@ -220,6 +234,9 @@ function makeStageFinder(raw,daysByDate){
     let st=normalise(loggedStage); if(st)return {stage:st,est:false,cd:null};
     const d=daysByDate[date];
     if(d){st=normalise(d.cycleStage);const cd=num(d.cycleDay);if(st)return {stage:st,est:false,cd};if(cd)return {stage:fromCycleDay(cd),est:false,cd}}
+    const starts=(Array.isArray(raw.periodStarts)?raw.periodStarts:[]).filter(x=>parseDay(x)).sort();
+    const prevStart=starts.filter(x=>x<=date).pop();
+    if(prevStart){const cd=dayDiff(prevStart,date)+1;if(cd<=len+7)return {stage:fromCycleDay(cd),est:false,cd}}
     if(start&&parseDay(start)){const diff=dayDiff(start,date);const cd=((diff%len)+len)%len+1;return {stage:fromCycleDay(cd),est:true,cd}}
     return {stage:null,est:false,cd:null};
   };
@@ -400,11 +417,11 @@ function renderCycle(D){
 }
 
 function renderFlares(D){
-  const buckets=[['Night','0 to 6',0,6],['Morning','6 to 10',6,10],['Late morning','10 to 13',10,13],['Afternoon','13 to 17',13,17],['Evening','17 to 21',17,21],['Late','21 to 24',21,24]];
+  const buckets=[['Night','0 to 6',0,6],['Morn','6 to 10',6,10],['Late am','10 to 13',10,13],['Aft','13 to 17',13,17],['Eve','17 to 21',17,21],['Late','21 to 24',21,24]];
   const counts=buckets.map(b=>D.flares.filter(f=>{const m=/^(\d{1,2})/.exec(f.time||'');if(!m)return false;const h=+m[1];return h>=b[2]&&h<b[3]}).length);
   draw('flareTimeChart',{type:'bar',data:{labels:buckets.map(b=>b[0]),datasets:[{label:'Flare logs',data:counts,backgroundColor:css('--flare'),borderRadius:4,borderSkipped:'bottom',maxBarThickness:36}]},
-    options:baseOpts({plugins:{legend:{display:false},title:{display:true,text:'Time of day',color:css('--ink'),font:{size:13,weight:'700'},align:'start'},tooltip:{...baseOpts().plugins.tooltip,callbacks:{title:c=>`${buckets[c[0].dataIndex][0]} (${buckets[c[0].dataIndex][1]}h)`}}},
-      scales:{x:{grid:{display:false},ticks:{color:css('--muted')}},y:{beginAtZero:true,grid:{color:css('--grid')},border:{display:false},ticks:{color:css('--muted'),precision:0}}}})});
+    options:baseOpts({plugins:{legend:{display:false},title:{display:true,text:'Time of day',color:css('--ink'),font:{size:13,weight:'700'},align:'start'},tooltip:{...baseOpts().plugins.tooltip,callbacks:{title:c=>`${buckets[c[0].dataIndex][1]}h`}}},
+      scales:{x:{grid:{display:false},ticks:{color:css('--muted'),maxRotation:0,autoSkip:false,font:{size:11}}},y:{beginAtZero:true,grid:{color:css('--grid')},border:{display:false},ticks:{color:css('--muted'),precision:0}}}})});
   const F=D.flares;
   if(!F.length){$('flareFacts').innerHTML='<div class="empty">No flares logged in this period 🌷</div>';return {}}
   const avgDur=mean(F.map(f=>num(f.duration)).filter(v=>v!=null&&v>0));
@@ -430,12 +447,16 @@ function renderFood(D){
   if(!ft.rows.length){$('foodTable').innerHTML=`<div class="empty">${ft.meals<5?`Needs at least 5 food logs (${ft.meals} so far).`:'No food or flag appears in 3+ meals yet.'}</div>`;return ft}
   const top=ft.rows.slice(0,12);
   $('foodTable').innerHTML=`<p class="helper" style="margin-top:-4px">Overall, ${pct(ft.base)} of ${ft.meals} meals were followed by symptoms.</p>
-  <table><thead><tr><th>Food / flag</th><th class="num">Meals</th><th class="num">Symptoms after</th><th class="num">Without it</th><th>Signal</th></tr></thead><tbody>
+  <div class="foodlist">
   ${top.map(r=>{
     const strong=r.n>=8&&r.lift>=1.5, hint=r.lift>=1.5;
     const sig=hint?`<span class="tag ${strong?'strong':''}">${r.lift===Infinity?'always':(r.lift.toFixed(1)+'×')} ${strong?'· stronger signal':'· early hint'}</span>`:r.lift<=0.67?'<span class="tag">seems fine</span>':'<span class="tag">no clear link</span>';
-    return `<tr><td>${esc(cap(r.item))}</td><td class="num">${r.n}</td><td class="num">${pct(r.rateWith)}</td><td class="num">${pct(r.rateWithout)}</td><td>${sig}</td></tr>`;
-  }).join('')}</tbody></table>`;
+    const w=Math.round(r.rateWith*100),wo=Math.round((r.rateWithout||0)*100);
+    return `<div class="fooditem"><div class="fi-top"><b>${esc(cap(r.item))}</b>${sig}</div>
+      <div class="fi-bars"><div class="fi-row"><span>With it</span><div class="fi-bar"><i style="width:${w}%"></i></div><em>${w}%</em></div>
+      <div class="fi-row muted"><span>Without</span><div class="fi-bar"><i style="width:${wo}%"></i></div><em>${wo}%</em></div></div>
+      <small>${r.n} meals logged</small></div>`;
+  }).join('')}</div>`;
   return ft;
 }
 

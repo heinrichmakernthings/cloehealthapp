@@ -3,7 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f7f4ee">
+<meta name="theme-color" content="#fff8fb">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cozy Club">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Cloe’s Cozy Club</title>
 <style>
 :root{
@@ -574,12 +580,81 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
 .pop-layer .pop-item.popped{animation:popBurst .38s ease-out forwards!important}
 @keyframes popRiseFull{0%{transform:translate(0,0)}33%{transform:translate(var(--sway),-38vh)}66%{transform:translate(calc(var(--sway) * -1),-76vh)}100%{transform:translate(0,calc(-100vh - 120px))}}
 @media(prefers-reduced-motion:reduce){.pop-item span{animation:none}.goal-card img{animation:none}}
+
+/* ---- smoother mobile layout ---- */
+.app{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20000;margin:0 auto;max-width:760px;display:grid!important;grid-template-columns:repeat(5,1fr);gap:2px;
+  padding:6px 8px calc(6px + env(safe-area-inset-bottom));background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);box-shadow:0 -6px 24px rgba(85,60,80,.07);overflow:visible}
+.tabbar button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0!important;background:none!important;color:var(--muted);
+  font-size:11px;font-weight:750;min-height:52px;padding:4px 0!important;border-radius:14px!important}
+.tabbar button .ti{font-size:21px;line-height:1;filter:grayscale(.35);transition:transform .15s}
+.tabbar button.active{color:var(--ink)!important;background:var(--pink)!important}
+.tabbar button.active .ti{filter:none;transform:scale(1.1)}
+.more-menu{position:fixed;left:0;right:0;margin:0 auto;max-width:744px;bottom:calc(72px + env(safe-area-inset-bottom));z-index:19999;width:calc(100% - 16px);
+  border-radius:20px;box-shadow:0 -10px 40px rgba(85,60,80,.16);padding:10px}
+.more-menu.show{grid-template-columns:repeat(4,1fr);animation:popIn .18s ease both}
+.more-menu button,.more-menu .more-link{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:68px;border:1px solid var(--line);border-radius:14px;background:#fff;
+  font-weight:750;font-size:13px;color:var(--ink);text-decoration:none}
+.more-menu .ti{font-size:22px}
+.toast{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:30001}
+.hero{margin-top:0}
+.quick-actions{margin-top:12px}
+@media(max-width:480px){
+  .hero h1{font-size:24px}.hero .sub{display:none}
+  .quick-actions{grid-template-columns:1fr;gap:8px}
+  .quick-actions .action{padding:14px 16px}.quick-actions .action strong{font-size:17px}
+}
+.charm{min-height:36px}
+.today-pill span,.pop-count span,.rw-status small,.pool-group-title,.flag-group-title{font-size:12px}
+.present small{font-size:12px}
+/* scales */
+.scale-hint{font-size:13px;color:var(--muted);background:#faf7f8;border:1px solid var(--line);border-radius:12px;padding:9px 11px;margin:6px 0 2px}
+.scale-field{margin:12px 0}.scale-field label{margin-bottom:6px}
+.scale-good{font-weight:600;color:var(--muted);font-size:12px;margin-left:4px}
+.scale button{min-height:42px}
+/* food flags as chips */
+.check{position:relative;min-height:44px;justify-content:center;text-align:center;cursor:pointer;transition:background .15s,border-color .15s}
+.check input{position:absolute;opacity:0;pointer-events:none}
+.check:has(input:checked){background:var(--pink);border-color:#f0a9c2;font-weight:800}
+.check:has(input:checked) span::before{content:'✓ '}
+.check:has(input:focus-visible){outline:3px solid rgba(63,57,64,.25)}
+/* data */
+.show-more{width:100%;margin-top:8px}
+/* folds */
+details.fold summary{list-style:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;min-height:40px}
+details.fold summary::-webkit-details-marker{display:none}
+details.fold summary h2{margin:0}
+.fold-hint{font-size:12px;color:var(--muted);font-weight:700}
+details.fold[open] .fold-hint{display:none}
+details.fold[open] summary{margin-bottom:6px}
+/* present pool chips */
+.pool-chips{display:flex;gap:6px;overflow-x:auto;margin:12px -4px 0;padding:2px 4px 4px;scrollbar-width:none}.pool-chips::-webkit-scrollbar{display:none}
+.pool-chip{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-weight:750;font-size:13px;min-height:38px;color:var(--ink)}
+.pool-chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+/* clues CTA */
+.insights-cta{display:flex;align-items:center;gap:12px;margin-top:12px;padding:16px;border-radius:20px;text-decoration:none;color:var(--ink);
+  background:linear-gradient(135deg,var(--lilac),var(--pink));border:1px solid var(--line);box-shadow:var(--shadow)}
+.insights-cta .ic{font-size:28px}.insights-cta b{display:block;font-size:17px}.insights-cta small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.insights-cta .go{margin-left:auto;font-size:22px;font-weight:800}
+
+.coupon button,.log-action,.recent-edit,[data-home-edit]{min-height:38px;padding-left:12px;padding-right:12px}
+.coupon small,.achievement small{font-size:12px}
+.countdown-tap{font-size:12px}
 </style>
 </head>
 <body>
 <!- Cloe Cozy Club Final v1 ->
 <div class="app" id="app">
-  <section class="hero">
+
+
+
+
+
+
+
+  <section class="panel active" id="home">
+  <div class="hero">
     <div class="eyebrow">Cloe’s cozy club</div>
     <h1>Tiny check-ins. Cute rewards. Better clues.</h1>
     <p class="sub">A tiny daily space to notice how you feel, spot patterns, and collect cute little rewards along the way.</p>
@@ -599,18 +674,27 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
       <button type="button" class="badge" data-go="daily" title="Open today’s check-in">🌿 Today: <strong id="todayStatus">not checked in</strong></button>
       <p class="helper" style="margin:10px 0 0">Private little tracker. Saved on this phone. No calorie counting, no “good” or “bad” food scoring.</p>
     </div>
-  </section>
-
-  <section class="progress-card">
+  </div>
+  <div class="progress-card">
     <div class="progress-head">
       <div><b id="nextRewardTitle">Next reward</b><br><span id="nextRewardSub">Complete today's check-in</span></div>
       <span id="progressText">0 / 7 days</span>
     </div>
     <div class="bar"><div id="progressBar"></div></div>
     <div class="milestones" id="milestones"></div>
-  </section>
+  </div>
+  <div class="grid quick-actions">
+    <button class="action daily" data-go="daily"><strong>🌤 How am I today?</strong><span>About 60 seconds. This keeps the streak alive.</span></button>
+    <button class="action" data-go="food"><strong>🍜 What did I eat?</strong><span>Quick IBS clues. No calories or judgement.</span></button>
+    <button class="action flare" data-go="flare"><strong>🫶 I feel a bit rubbish</strong><span>Capture a flare while the details are fresh.</span></button>
+  </div>
 
-  <section class="lookforward-card" id="funCountdownCard" role="button" tabindex="0" aria-label="Cycle fun countdowns">
+    <div class="today-strip" aria-label="Today's activity">
+      <div class="today-pill"><b id="todayDailyCount">0</b><span>check-in</span></div>
+      <div class="today-pill"><b id="todayFoodCount">0</b><span>food logs</span></div>
+      <div class="today-pill"><b id="todayFlareCount">0</b><span>flare logs</span></div>
+    </div>
+  <div class="lookforward-card" id="funCountdownCard" role="button" tabindex="0" aria-label="Cycle fun countdowns">
     <div class="lookforward-grid">
       <div class="countdown-bubble" id="funCountdownBubble"><b id="gtaDays">·</b><span id="funCountdownUnit">days</span></div>
       <div class="countdown-copy" id="funCountdownCopy">
@@ -627,36 +711,7 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
         </div>
       </div>
     </div>
-  </section>
-
-  <div class="grid">
-    <button class="action daily" data-go="daily"><strong>🌤 How am I today?</strong><span>About 60 seconds. This keeps the streak alive.</span></button>
-    <button class="action" data-go="food"><strong>🍜 What did I eat?</strong><span>Quick IBS clues. No calories or judgement.</span></button>
-    <button class="action flare" data-go="flare"><strong>🫶 I feel a bit rubbish</strong><span>Capture a flare while the details are fresh.</span></button>
   </div>
-
-
-  <section class="card" style="padding:12px 14px">
-    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
-      <div><b>💾 Saved on this phone</b><div class="helper" style="margin:2px 0 0">Your check-ins stay privately in this browser.</div></div>
-      <span class="badge">Local save</span>
-    </div>
-  </section>
-
-  <div class="nav">
-    <button data-tab="home" class="active">Home</button>
-    <button data-tab="daily">Daily</button>
-    <button data-tab="food">Food</button>
-    <button data-tab="flare">Flare</button>
-    <button type="button" id="moreToggle" aria-expanded="false">More ▾</button>
-  </div>
-  <div class="more-menu" id="moreMenu">
-    <button type="button" data-go="patterns">Clues</button>
-    <button type="button" data-go="rewards">Treats</button>
-    <button type="button" data-go="data">Data</button>
-  </div>
-
-  <section class="panel active" id="home">
     <div class="card pop-card" id="popCard">
       <div class="pop-head">
         <div><h2>🫧 Pop break</h2><p class="helper" style="margin:2px 0 0">Tap the hearts and bubbles. Purely for vibes.</p></div>
@@ -664,24 +719,6 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
       </div>
       <div class="pop-field" id="popField" aria-label="Hearts and bubbles to pop"></div>
       <div class="pop-msg" id="popMsg" aria-live="polite"></div>
-    </div>
-      <div class="primary-actions" aria-label="Quick logging">
-        <button type="button" class="primary-action" data-go="daily">
-          <span class="picon">🌿</span><span><b>Daily check-in</b><small>How are you today?</small></span>
-        </button>
-        <button type="button" class="primary-action" data-go="food">
-          <span class="picon">🍜</span><span><b>Log food</b><small>Add a meal or snack</small></span>
-        </button>
-        <button type="button" class="primary-action" data-go="flare">
-          <span class="picon">🫶</span><span><b>Log a flare</b><small>Capture symptoms quickly</small></span>
-        </button>
-      </div>
-
-
-    <div class="today-strip" aria-label="Today's activity">
-      <div class="today-pill"><b id="todayDailyCount">0</b><span>check-in</span></div>
-      <div class="today-pill"><b id="todayFoodCount">0</b><span>food logs</span></div>
-      <div class="today-pill"><b id="todayFlareCount">0</b><span>flare logs</span></div>
     </div>
 
     <div class="card">
@@ -753,7 +790,12 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
 
 
     </div>
-  </section>
+    <div class="card" style="text-align:center;background:linear-gradient(135deg,var(--pink),var(--baby));padding:16px 14px">
+    <div style="font-size:22px;margin-bottom:4px">💌</div>
+    <b style="font-size:16px">I love you &amp; your FAT BUM 🍑</b>
+    <div class="helper" style="margin:4px 0 0">from Sam x</div>
+  </div>
+</section>
 
   <section class="panel" id="daily">
     <form class="card" id="dailyForm">
@@ -764,7 +806,7 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
         <div class="field"><label>Date</label><input name="date" type="date" required></div>
         <div class="field"><label>Overall day</label><select name="overall"><option>🟢 Good</option><option selected>🟡 Okay</option><option>🔴 Bad</option></select></div>
       </div>
-      <div id="dailyScales"></div>
+      <p class="scale-hint">Tap a number: 0 is none, 10 is a lot. Skip anything that doesn't apply today, and tap again to clear.</p><div id="dailyScales"></div>
       <div class="field"><label>Bowel</label><select name="bowel"><option>Normal</option><option>Constipated</option><option>Loose</option><option>Diarrhoea</option><option>None</option><option>Mixed</option></select></div>
       <div class="row2">
         <div class="field"><label>Sleep hours</label><input name="sleepHours" type="number" step=".5" min="0" max="16"></div>
@@ -818,7 +860,7 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
         </div>
       </div>
       <div class="field"><label>Symptoms within about 3 hours?</label><select name="symptoms"><option>No</option><option>Yes</option></select></div>
-      <div id="foodScales"></div>
+      <p class="scale-hint">Tap a number: 0 is none, 10 is a lot. Skip anything that doesn't apply today, and tap again to clear.</p><div id="foodScales"></div>
       <div class="field"><label>Notes</label><textarea name="notes" placeholder="Anything else?"></textarea></div>
       <div class="form-footer">
         <button class="submit sage" type="submit">Save meal 🌱</button>
@@ -846,7 +888,7 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
         <div class="field"><label>Hours since last food</label><input name="lastAte" type="number" step=".5" min="0" max="24"></div>
         <div class="field"><label>First symptom</label><input name="firstSymptom" type="text"></div>
       </div>
-      <div id="flareScales"></div>
+      <p class="scale-hint">Tap a number: 0 is none, 10 is a lot. Skip anything that doesn't apply today, and tap again to clear.</p><div id="flareScales"></div>
       <div class="row2">
         <div class="field"><label>Pain side</label><select name="painSide"><option>None</option><option>Left</option><option>Right</option><option>Centre</option><option>General</option><option>Other</option></select></div>
         <div class="field"><label>Duration (mins)</label><input name="duration" type="number" min="0" max="1440"></div>
@@ -862,6 +904,11 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
   </section>
 
   <section class="panel" id="patterns">
+    <a class="insights-cta" href="/insights">
+      <span class="ic">✨</span>
+      <span><b>Smart insights &amp; charts</b><small>Patterns, food triggers, cycle links and a doctor summary</small></span>
+      <span class="go">→</span>
+    </a>
 <div class="weekly-postcard">
         <div class="eyebrow">This week's postcard 💌</div>
         
@@ -932,7 +979,20 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
       <h2>Flare logs</h2>
       <div class="data-table-wrap"><table class="data-table" id="flareDataTable"></table></div>
     </div>
-  </section>
+    <div class="card">
+    <h2>💾 My backup</h2>
+    <p class="helper">Everything saves automatically on this phone. Use this only if you ever want to move your history to another device.</p>
+    <div class="helper" id="cloudStatus" style="font-weight:700">☁️ Cloud backup is off on this phone.</div>
+    <div class="backup-grid">
+      <button type="button" class="backup-btn primary" id="exportBackup">Download backup</button>
+      <label class="backup-btn" style="display:flex;align-items:center;justify-content:center;cursor:pointer">
+        Restore backup
+        <input id="importBackup" type="file" accept="application/json" style="display:none">
+      </label>
+    </div>
+    <div class="backup-note">If browser data is cleared or the app is opened on a different domain/device, local history won’t automatically follow. This backup keeps it safe.</div>
+  </div>
+</section>
 
   <section class="panel" id="rewards">
 
@@ -1011,21 +1071,21 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
         <p class="helper" style="margin-bottom:8px">Coupons unlock as XP goes up. Redeeming one is legally binding according to Biscuits.</p>
         <div class="coupon-grid" id="couponGrid"></div>
       </div>
-      <div class="card">
-        <h2 style="font-size:17px">🏆 Achievements</h2>
+      <details class="card fold">
+        <summary><h2 style="font-size:17px">🏆 Achievements</h2><span class="fold-hint">Tap to open</span></summary>
         <p class="helper" style="margin-bottom:8px">Extremely serious awards for extremely serious admin.</p>
         <div class="achievement-grid" id="achievementGrid"></div>
-      </div>
-      <div class="card">
-        <h2 style="font-size:17px">🎁 Tiny loot shelf</h2>
+      </details>
+      <details class="card fold">
+        <summary><h2 style="font-size:17px">🎁 Tiny loot shelf</h2><span class="fold-hint">Tap to open</span></summary>
         <p class="helper" style="margin-bottom:8px">Random little collectibles can drop after logging.</p>
         <div class="loot-shelf" id="lootShelf"></div>
-      </div>
-      <div class="card">
-        <h2 style="font-size:17px">🧺 Cloe's Shelf</h2>
+      </details>
+      <details class="card fold">
+        <summary><h2 style="font-size:17px">🧺 Cloe's Shelf</h2><span class="fold-hint">Tap to open</span></summary>
         <p class="helper" style="margin-bottom:8px">Loot, badges and tiny nonsense all live here.</p>
         <div class="collection-grid" id="collectionGrid"></div>
-      </div>
+      </details>
 
       <div class="utility-row">
         <button type="button" class="utility-btn" id="undoLastSave">↩ Undo last save</button>
@@ -1035,25 +1095,7 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
 
 
 
-  <section class="card">
-    <h2>💾 My backup</h2>
-    <p class="helper">Everything saves automatically on this phone. Use this only if you ever want to move your history to another device.</p>
-    <div class="helper" id="cloudStatus" style="font-weight:700">☁️ Cloud backup is off on this phone.</div>
-    <div class="backup-grid">
-      <button type="button" class="backup-btn primary" id="exportBackup">Download backup</button>
-      <label class="backup-btn" style="display:flex;align-items:center;justify-content:center;cursor:pointer">
-        Restore backup
-        <input id="importBackup" type="file" accept="application/json" style="display:none">
-      </label>
-    </div>
-    <div class="backup-note">If browser data is cleared or the app is opened on a different domain/device, local history won’t automatically follow. This backup keeps it safe.</div>
-  </section>
 
-  <section class="card" style="text-align:center;background:linear-gradient(135deg,var(--pink),var(--baby));padding:16px 14px">
-    <div style="font-size:22px;margin-bottom:4px">💌</div>
-    <b style="font-size:16px">I love you &amp; your FAT BUM 🍑</b>
-    <div class="helper" style="margin:4px 0 0">from Sam x</div>
-  </section>
 
   
   
@@ -1084,6 +1126,19 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
   <div class="sam-transmission" id="samTransmission">
     <b>📡 Sam transmission</b>
     <span id="samTransmissionText">BREAKING: still fit.</span>
+  </div>
+  <nav class="nav tabbar" aria-label="Sections">
+    <button data-tab="home" class="active"><span class="ti">🏠</span>Home</button>
+    <button data-tab="daily"><span class="ti">🌤</span>Daily</button>
+    <button data-tab="food"><span class="ti">🍜</span>Food</button>
+    <button data-tab="flare"><span class="ti">🫶</span>Flare</button>
+    <button type="button" id="moreToggle" aria-expanded="false"><span class="ti">☰</span>More</button>
+  </nav>
+  <div class="more-menu" id="moreMenu">
+    <button type="button" data-go="patterns"><span class="ti">🔎</span>Clues</button>
+    <a class="more-link" href="/insights"><span class="ti">✨</span>Insights</a>
+    <button type="button" data-go="rewards"><span class="ti">🎁</span>Treats</button>
+    <button type="button" data-go="data"><span class="ti">📊</span>Data</button>
   </div>
   <div class="toast" id="toast" aria-live="polite"></div>
 </div>
@@ -1371,7 +1426,7 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
    if(!form)return;
    form.reset();
    form.querySelectorAll('.scale button').forEach(b=>b.classList.remove('sel'));
-   form.querySelectorAll('input[type=hidden]').forEach(i=>i.value='0');
+   form.querySelectorAll('input[type=hidden]').forEach(i=>i.value='');
    const d=form.querySelector('input[type=date]'); if(d)d.value=today();
    const t=form.querySelector('input[type=time]'); if(t)t.value=nowTime();
  }
@@ -1415,11 +1470,13 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
    if(id==='patterns')renderCluesPanel();
    if(id==='data')renderDataDashboard(streak());
    if(mt){
-     const labels={patterns:'Clues',rewards:'Treats',data:'Data'};
-     mt.textContent=labels[id]?`${labels[id]} ▾`:'More ▾';
+     const labels={patterns:['🔎','Clues'],rewards:['🎁','Treats'],data:['📊','Data']};
+     const l=labels[id]||['☰','More'];
+     mt.innerHTML=`<span class="ti">${l[0]}</span>${l[1]}`;
+     mt.classList.toggle('active',!!labels[id]);
    }
    renderGTACountdown();
-   window.scrollTo({top:0,behavior:'smooth'});
+   window.scrollTo({top:0,behavior:'instant' in document.documentElement.style?'instant':'auto'});
  }
  document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
  document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.go)));
@@ -1428,14 +1485,17 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
  const foodMetrics=[['bloating','Bloating'],['cramps','Cramps'],['diarrhoea','Diarrhoea'],['nausea','Nausea']];
  const flareMetrics=[['dizzy','Faint / dizzy'],['shaking','Shaking'],['nausea','Nausea'],['disorientation','Disorientation'],['pain','Pelvic / abdominal pain'],['bloating','Bloating'],['headache','Headache'],['heart','Heart racing'],['cramps','Muscle cramps']];
  function scaleBlock(name,label){
-   return `<div class="field"><label>${label}</label><div class="scale" data-scale="${name}">
-   ${[0,2,4,6,8,10].map(v=>`<button type="button" data-v="${v}">${v}</button>`).join('')}</div><div class="scale-note"><span>none / low</span><span>high</span></div><input type="hidden" name="${name}" value="0"></div>`
+   const good=['energy','sleepQuality'].includes(name);
+   return `<div class="field scale-field"><label>${label}${good?' <small class="scale-good">10 = great</small>':''}</label><div class="scale" data-scale="${name}">
+   ${[0,2,4,6,8,10].map(v=>`<button type="button" data-v="${v}">${v}</button>`).join('')}</div><input type="hidden" name="${name}" value=""></div>`
  }
  document.getElementById('dailyScales').innerHTML=dailyMetrics.map(x=>scaleBlock(...x)).join('');
  document.getElementById('foodScales').innerHTML=foodMetrics.map(x=>scaleBlock(...x)).join('');
  document.getElementById('flareScales').innerHTML=flareMetrics.map(x=>scaleBlock(...x)).join('');
  document.querySelectorAll('.scale button').forEach(b=>b.addEventListener('click',()=>{
-   const wrap=b.closest('.scale');wrap.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');wrap.parentElement.querySelector('input[type=hidden]').value=b.dataset.v;
+   const wrap=b.closest('.scale'),was=b.classList.contains('sel');wrap.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));
+   if(!was)b.classList.add('sel');wrap.parentElement.querySelector('input[type=hidden]').value=was?'':b.dataset.v;
+   if(navigator.vibrate)try{navigator.vibrate(5)}catch(e){}
  }));
  const flagGroups={
    fodmap:['Onion','Garlic','Wheat','Beans/Lentils'],
@@ -2073,6 +2133,17 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
    if(!csv){toast('Nothing to export yet');return;}
    downloadText(`cloe-${names[type]}-${today()}.csv`,csv,'text/csv;charset=utf-8');
  }
+ const DATA_LIMIT={};
+ const byNewest=(a,b)=>((b.date||'')+(b.time||'')+(b.savedAt||'')).localeCompare((a.date||'')+(a.time||'')+(a.savedAt||''));
+ function showMoreBtn(id,total){
+   const wrap=document.getElementById(id)?.closest('.data-table-wrap'); if(!wrap)return;
+   let btn=wrap.nextElementSibling&&wrap.nextElementSibling.classList.contains('show-more')?wrap.nextElementSibling:null;
+   const limit=DATA_LIMIT[id]||15;
+   if(total<=limit){if(btn)btn.remove();return}
+   if(!btn){btn=document.createElement('button');btn.type='button';btn.className='show-more utility-btn';wrap.after(btn);
+     btn.addEventListener('click',()=>{DATA_LIMIT[id]=100000;renderDataDashboard(streak())})}
+   btn.textContent=`Show all ${total}`;
+ }
  function renderDataTable(id,rows,preferred){
    const el=document.getElementById(id); if(!el) return;
    if(!rows.length){el.innerHTML='<tbody><tr><td>No entries yet.</td></tr></tbody>';return;}
@@ -2080,8 +2151,9 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
    const extra=[...new Set(rows.flatMap(r=>Object.keys(r)))].filter(k=>!keys.includes(k) && k!=='savedAt');
    keys=keys.concat(extra);
    el.innerHTML='<thead><tr>'+keys.map(k=>`<th>${escapeHtml(k)}</th>`).join('')+'</tr></thead><tbody>'+
-     [...rows].reverse().slice(0,100).map(r=>'<tr>'+keys.map(k=>`<td>${escapeHtml(Array.isArray(r[k])?r[k].join(', '):(r[k]??''))}</td>`).join('')+'</tr>').join('')+
+     [...rows].sort(byNewest).slice(0,DATA_LIMIT[id]||15).map(r=>'<tr>'+keys.map(k=>`<td>${escapeHtml(Array.isArray(r[k])?r[k].join(', '):(r[k]??''))}</td>`).join('')+'</tr>').join('')+
      '</tbody>';
+   showMoreBtn(id,rows.length);
  }
 
  function localDateString(d){
@@ -2349,7 +2421,7 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
  function renderSoftMode(){
    const card=document.getElementById('softModeCard');if(!card)return;
    const d=(state.daily||[]).find(x=>x.date===today());
-   const rough=!!(d && (String(d.overall||'').includes('Bad') || Number(d.pain)>=8 || Number(d.energy)<=2));
+   const rough=!!(d && (String(d.overall||'').includes('Bad') || (d.pain!==''&&d.pain!=null&&Number(d.pain)>=8) || (d.energy!==''&&d.energy!=null&&Number(d.energy)<=2)));
    card.classList.toggle('show',rough);
  }
 
@@ -2574,11 +2646,22 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
      if([...stage.options].some(o=>o.value===mapped||o.text===mapped))stage.value=mapped;
    }
  }
+ // every period start is kept, so cycle patterns stay accurate for older days too
+ function rememberPeriodStart(d){
+   if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return;
+   const list=Array.isArray(state.periodStarts)?state.periodStarts.filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x)):[];
+   // a correction within 10 days replaces the nearby start instead of adding a second one
+   const near=list.findIndex(x=>Math.abs((new Date(x+'T12:00')-new Date(d+'T12:00'))/86400000)<=10);
+   if(near>=0)list[near]=d; else list.push(d);
+   state.periodStarts=[...new Set(list)].sort();
+ }
+ if(state.cycle&&state.cycle.lastPeriodStart&&!(Array.isArray(state.periodStarts)&&state.periodStarts.length))rememberPeriodStart(state.cycle.lastPeriodStart);
  function saveCycleSettings(){
    const start=document.getElementById('cycleLastStart')?.value||'';
    const len=Math.max(20,Math.min(60,Number(document.getElementById('cycleLength')?.value)||28));
    const periodLen=Math.max(2,Math.min(10,Number(document.getElementById('cyclePeriodLength')?.value)||5));
    state.cycle={lastPeriodStart:start,cycleLength:len,periodLength:periodLen};
+   rememberPeriodStart(start);
    persist();
    renderCycleTracker();
    syncCycleIntoDailyForm();
@@ -2724,8 +2807,9 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
 
    const indexed=(Array.isArray(state.food)?state.food:[])
      .map((row,index)=>({row,index}))
-     .reverse()
-     .slice(0,100);
+     .sort((a,b)=>byNewest(a.row,b.row))
+     .slice(0,DATA_LIMIT.foodDataTable||15);
+   setTimeout(()=>showMoreBtn('foodDataTable',rows.length));
 
    el.innerHTML=
      '<thead><tr>'+
@@ -2857,7 +2941,8 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
    if(!rows.length){el.innerHTML='<tbody><tr><td>No entries yet.</td></tr></tbody>';return;}
    const keys=['date','time','activity','firstSymptom','dizzy','shaking','nausea','disorientation','pain','painSide','bloating','duration','cycleStage','notes']
      .filter(k=>rows.some(r=>r[k]!=null&&r[k]!==''));
-   const indexed=(state.flare||[]).map((row,index)=>({row,index})).reverse().slice(0,100);
+   const indexed=(state.flare||[]).map((row,index)=>({row,index})).sort((a,b)=>byNewest(a.row,b.row)).slice(0,DATA_LIMIT.flareDataTable||15);
+   setTimeout(()=>showMoreBtn('flareDataTable',rows.length));
    el.innerHTML='<thead><tr>'+keys.map(k=>`<th>${escapeHtml(k)}</th>`).join('')+'<th>Actions</th></tr></thead><tbody>'+
      indexed.map(({row,index})=>'<tr>'+
        keys.map(k=>`<td>${escapeHtml(Array.isArray(row[k])?row[k].join(', '):(row[k]??''))}</td>`).join('')+
@@ -2938,7 +3023,7 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
    document.getElementById('pDays').textContent=d30.length;document.getElementById('pMeals').textContent=f30.length;document.getElementById('pFlares').textContent=fl30.length;
    let pats=[];
    if(d30.length){
-     const avg=n=>{const vals=d30.map(x=>Number(x[n])).filter(Number.isFinite);return vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1):'·'};
+     const avg=n=>{const vals=d30.map(x=>x[n]===''||x[n]==null?NaN:Number(x[n])).filter(Number.isFinite);return vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1):'·'};
      pats.push(`Average bloating: ${avg('bloating')}/10 · pain: ${avg('pain')}/10 · dizziness: ${avg('dizziness')}/10`);
    }
    if(f30.length){
@@ -3051,6 +3136,7 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
 
  const moreToggle=document.getElementById('moreToggle');
  const moreMenu=document.getElementById('moreMenu');
+ document.addEventListener('click',e=>{if(moreMenu&&moreMenu.classList.contains('show')&&!e.target.closest('#moreMenu,#moreToggle')){moreMenu.classList.remove('show');moreToggle.setAttribute('aria-expanded','false')}});
  if(moreToggle&&moreMenu){
    moreToggle.addEventListener('click',()=>{
      const open=moreMenu.classList.toggle('show');
@@ -3111,6 +3197,7 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
  [cycleLastStart,cycleLength,cyclePeriodLength].forEach(el=>el?.addEventListener('change',saveCycleSettings));
  document.getElementById('periodStartedToday')?.addEventListener('click',()=>{
    state.cycle={...(state.cycle||{}),lastPeriodStart:today()};
+   rememberPeriodStart(today());
    persist();
    renderCycleTracker();
    syncCycleIntoDailyForm();
@@ -3269,13 +3356,20 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
    const el=document.getElementById('presentPool'); if(!el)return;
    const pool=presentPool(), likes=poolLikes(), groups=[];
    pool.forEach(x=>{const g=x.group||'Surprises';if(!groups.includes(g))groups.push(g)});
-   el.innerHTML=groups.map(g=>`<div class="pool-group"><div class="pool-group-title">${escapeHtml(g)}</div><div class="present-pool">${
-     pool.map((x,i)=>({x,i})).filter(({x})=>(x.group||'Surprises')===g).map(({x,i})=>{
+   const tabs=['💗 Hearted',...groups];
+   if(!renderPresentPool.cur||!tabs.includes(renderPresentPool.cur))renderPresentPool.cur=likes.length?'💗 Hearted':groups[0];
+   const cur=renderPresentPool.cur;
+   const shown=cur==='💗 Hearted'?pool.map((x,i)=>({x,i})).filter(({x})=>likes.includes(x.name)):pool.map((x,i)=>({x,i})).filter(({x})=>(x.group||'Surprises')===cur);
+   el.innerHTML=`<div class="pool-chips" role="tablist">${tabs.map(t=>`<button type="button" class="pool-chip ${t===cur?'on':''}" data-pool-tab="${escapeHtml(t)}">${escapeHtml(t)}${t==='💗 Hearted'?` ${likes.length}`:''}</button>`).join('')}</div>`+
+   (shown.length?'':'<div class="helper" style="margin-top:10px">Nothing hearted yet. Tap the 🤍 on anything you\'d love.</div>')+
+   [cur].map(g=>`<div class="pool-group"><div class="present-pool">${
+     shown.map(({x,i})=>{
        const liked=likes.includes(x.name);
        return `<button type="button" class="present ${liked?'liked':''}" data-pool="${i}" aria-pressed="${liked}"><span class="icon">${escapeHtml(x.icon||'🎁')}</span><span class="ptxt"><b>${escapeHtml(x.name)}</b><small>${escapeHtml(x.desc||'')}</small></span><span class="heart" aria-hidden="true">${liked?'💗':'🤍'}</span></button>`;
      }).join('')}</div></div>`).join('');
  }
  document.getElementById('presentPool')?.addEventListener('click',e=>{
+   const tab=e.target.closest('[data-pool-tab]'); if(tab){renderPresentPool.cur=tab.dataset.poolTab;renderPresentPool();return}
    const b=e.target.closest('[data-pool]'); if(!b)return;
    const item=presentPool()[Number(b.dataset.pool)]; if(!item)return;
    let likes=poolLikes();
