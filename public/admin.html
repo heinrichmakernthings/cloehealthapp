@@ -13,11 +13,12 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 h1{font-size:26px;margin:4px 0}.sub{color:var(--muted);margin:0 0 12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:17px;margin-top:12px}
 .card h2{margin:0 0 4px;font-size:19px}.helper{color:var(--muted);font-size:14px;line-height:1.45;margin:0 0 12px}
-input,select,textarea{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+input,select,textarea{font-size:16px;width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
 textarea{min-height:56px;resize:vertical}
 label{display:block;font-size:12px;font-weight:750;margin:0 0 4px;color:var(--muted)}
 .row{border:1px solid var(--line);border-radius:16px;padding:12px;margin:10px 0;background:#fffafc}
-.grid{display:grid;gap:8px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:70px 1fr 1fr}.g4{grid-template-columns:70px 1fr 90px}
+.grid{display:grid;gap:8px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:64px 1fr 1fr}.g4{grid-template-columns:64px 1fr 100px}
+@media(max-width:480px){.g3{grid-template-columns:64px 1fr}.g3>div:last-child{grid-column:1/-1}.rowtop{flex-wrap:wrap}}
 .btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;font-weight:700;color:var(--ink)}
 .btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}.btn.small{padding:6px 10px;font-size:13px}
 .btn.danger{color:var(--red)}.btn:disabled{opacity:.5}
@@ -26,7 +27,11 @@ label{display:block;font-size:12px;font-weight:750;margin:0 0 4px;color:var(--mu
 .panel{display:none}.panel.active{display:block}
 .rowtop{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
 .rowtop b{font-size:14px}.inline{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink);margin-top:6px}
-.inline input{width:auto}
+.inline input{width:22px;height:22px}
+button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:-15px;margin-right:-15px;padding:0 15px}.tabs::-webkit-scrollbar{display:none}.tab{white-space:nowrap;min-height:40px}
+.btn.small{min-height:36px;min-width:36px}
+.app{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
 .savebar{position:sticky;bottom:10px;margin-top:16px;display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px 12px;box-shadow:var(--shadow)}
 .savebar span{flex:1;font-size:14px;color:var(--muted)}
 .stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}.stat div{border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center;background:#faf9f6}
@@ -59,6 +64,7 @@ label{display:block;font-size:12px;font-weight:750;margin:0 0 4px;color:var(--mu
     <button class="tab active" data-tab="countdowns">⏳ Countdowns</button>
     <button class="tab" data-tab="rewards">🎁 Rewards</button>
     <button class="tab" data-tab="coupons">🎟️ Coupons</button>
+    <button class="tab" data-tab="pool">🎁 Present pool</button>
     <button class="tab" data-tab="data">☁️ Data & backup</button>
     <button class="tab" data-tab="security">🔐 PIN</button>
   </div>
@@ -75,9 +81,7 @@ label{display:block;font-size:12px;font-weight:750;margin:0 0 4px;color:var(--mu
   <section class="panel" id="p-rewards">
     <div class="card">
       <h2>🎁 Streak rewards</h2>
-      <p class="helper">Each reward repeats on its own cycle, based on her daily check-in streak. With 7 / 30 / 60, she gets a matcha date at 7, 14, 21… a meal out at 30, 60, 90… and a big present at 60, 120…</p>
-      <label>Daily treat text</label>
-      <input id="dailyReward" maxlength="120">
+      <p class="helper">Based on her daily check-in streak. Each reward repeats on its own cycle (a 7-day reward comes at 7, 14, 21…) unless you tick “One-off”, like the kitten.</p>
       <div id="tierList"></div>
       <button class="btn" id="addTier">+ Add reward</button>
     </div>
@@ -92,11 +96,21 @@ label{display:block;font-size:12px;font-weight:750;margin:0 0 4px;color:var(--mu
     </div>
   </section>
 
+  <section class="panel" id="p-pool">
+    <div class="card">
+      <h2>🎁 Surprise present pool</h2>
+      <p class="helper">Ideas shown on her Treats page. She can heart the ones she likes (that's your hint list) and tap “Pick one for me” for a random one. The group is just a heading, like Cosy or Days out.</p>
+      <div id="poolHints" class="helper"></div>
+      <div id="poolList"></div>
+      <button class="btn" id="addPool">+ Add present idea</button>
+    </div>
+  </section>
+
   <section class="panel" id="p-data">
     <div class="card">
       <h2>☁️ Her cloud backup</h2>
       <div id="dataSummary" class="helper">Loading…</div>
-      <div class="stat"><div><b id="cDaily">–</b><span>check-ins</span></div><div><b id="cFood">–</b><span>food logs</span></div><div><b id="cFlare">–</b><span>flare logs</span></div></div>
+      <div class="stat"><div><b id="cDaily">0</b><span>check-ins</span></div><div><b id="cFood">0</b><span>food logs</span></div><div><b id="cFlare">0</b><span>flare logs</span></div></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <a class="btn primary" href="/insights?view=admin" style="text-decoration:none">✨ Open insights dashboard</a>
         <button class="btn" id="downloadData">⬇ Download her data (JSON)</button>
@@ -104,7 +118,7 @@ label{display:block;font-size:12px;font-weight:750;margin:0 0 4px;color:var(--mu
     </div>
     <div class="card">
       <h2>📲 Pairing link for her phone</h2>
-      <p class="helper">Send this to Cloe and have her open it <b>on her phone, in the browser she uses for the app</b>. It switches cloud backup on — no password for her. Keep it private: anyone with this link can see her logs.</p>
+      <p class="helper">Send this to Cloe and have her open it <b>on her phone, in the browser she uses for the app</b>. It switches cloud backup on, no password for her. Keep it private: anyone with this link can see her logs.</p>
       <div class="code" id="pairLink">…</div>
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
         <button class="btn" id="copyPair">Copy link</button>
@@ -121,7 +135,7 @@ label{display:block;font-size:12px;font-weight:750;margin:0 0 4px;color:var(--mu
   <section class="panel" id="p-security">
     <div class="card">
       <h2>🔐 Change your PIN</h2>
-      <p class="helper">4–12 digits.</p>
+      <p class="helper">4 to 12 digits.</p>
       <input id="newPin" type="password" inputmode="numeric" placeholder="New PIN">
       <input id="newPin2" type="password" inputmode="numeric" placeholder="Same again" style="margin-top:8px">
       <button class="btn primary" id="changePin" style="margin-top:10px">Change PIN</button>
@@ -180,7 +194,25 @@ label{display:block;font-size:12px;font-weight:750;margin:0 0 4px;color:var(--mu
     cfg=await fetch('/api/config',{cache:'no-store'}).then(r=>r.json());
     renderAll();
   }
-  function renderAll(){renderCountdowns();renderTiers();renderCoupons();}
+  function renderAll(){cfg.presentPool=cfg.presentPool||[];renderCountdowns();renderTiers();renderCoupons();renderPool();}
+
+  // ---------- present pool ----------
+  function renderPool(){
+    const groups=[...new Set(cfg.presentPool.map(x=>x.group).filter(Boolean))];
+    $('poolList').innerHTML=`<datalist id="poolGroups">${groups.map(g=>`<option value="${esc(g)}">`).join('')}</datalist>`+cfg.presentPool.map((x,i)=>`
+      <div class="row" data-i="${i}">
+        <div class="rowtop"><b>${esc(x.icon)} ${esc(x.name)||'New idea'} <small style="color:var(--muted)">${esc(x.group)}</small></b>
+          <span><button class="btn small" data-move="-1">↑</button> <button class="btn small" data-move="1">↓</button> <button class="btn small danger" data-del>Remove</button></span></div>
+        <div class="grid g4">
+          <div><label>Icon</label><input data-k="icon" value="${esc(x.icon)}" maxlength="8"></div>
+          <div><label>Present</label><input data-k="name" value="${esc(x.name)}" maxlength="60"></div>
+          <div><label>Group</label><input data-k="group" list="poolGroups" value="${esc(x.group)}" maxlength="40"></div>
+        </div>
+        <div style="margin-top:8px"><label>Little description</label><input data-k="desc" value="${esc(x.desc)}" maxlength="120"></div>
+      </div>`).join('');
+  }
+  bindList('poolList',()=>cfg.presentPool,renderPool);
+  $('addPool').onclick=()=>{cfg.presentPool.push({group:'Wildcards',icon:'🎁',name:'',desc:''});renderPool();markDirty()};
 
   // ---------- countdowns ----------
   function renderCountdowns(){
@@ -206,18 +238,17 @@ label{display:block;font-size:12px;font-weight:750;margin:0 0 4px;color:var(--mu
 
   // ---------- reward tiers ----------
   function renderTiers(){
-    $('dailyReward').value=cfg.rewards.daily||'';
     $('tierList').innerHTML=cfg.rewards.tiers.map((t,i)=>`
       <div class="row" data-i="${i}">
-        <div class="rowtop"><b>${esc(t.emoji)} ${esc(t.label)||'New reward'} · every ${esc(t.every)} days</b><button class="btn small danger" data-del>Remove</button></div>
+        <div class="rowtop"><b>${esc(t.emoji)} ${esc(t.label)||'New reward'} · ${t.once?'once at':'every'} ${esc(t.every)} days</b><button class="btn small danger" data-del>Remove</button></div>
         <div class="grid g4">
           <div><label>Emoji</label><input data-k="emoji" value="${esc(t.emoji)}" maxlength="8"></div>
           <div><label>Reward</label><input data-k="label" value="${esc(t.label)}" maxlength="80"></div>
-          <div><label>Every … days</label><input type="number" min="1" max="365" data-k="every" value="${esc(t.every)}"></div>
+          <div><label>Days</label><input type="number" min="1" max="365" data-k="every" value="${esc(t.every)}"></div>
         </div>
+        <label class="inline"><input type="checkbox" data-k="once" ${t.once?'checked':''}> One-off (doesn't repeat)</label>
       </div>`).join('');
   }
-  $('dailyReward').addEventListener('input',e=>{cfg.rewards.daily=e.target.value;markDirty()});
   bindList('tierList',()=>cfg.rewards.tiers,renderTiers);
   $('addTier').onclick=()=>{cfg.rewards.tiers.push({every:14,emoji:'🎀',label:''});renderTiers();markDirty()};
 
@@ -276,11 +307,13 @@ label{display:block;font-size:12px;font-weight:750;margin:0 0 4px;color:var(--mu
     $('sharePair').onclick=()=>{if(navigator.share)navigator.share({title:'Cozy Club backup',text:'Open this on your phone to switch on cloud backup 💛',url:link});else $('copyPair').click()};
     try{
       const st=await call('/api/admin/state');
-      if(!st.data){$('dataSummary').textContent='No backup yet. Send her the pairing link below — her data uploads the moment she opens it.';}
+      if(!st.data){$('dataSummary').textContent='No backup yet. Send her the pairing link below. Her data uploads the moment she opens it.';}
       else{
         $('cDaily').textContent=st.counts.daily;$('cFood').textContent=st.counts.food;$('cFlare').textContent=st.counts.flare;
         const when=st.updatedAt?new Date(st.updatedAt.replace(' ','T')+'Z').toLocaleString('en-GB'):'';
         $('dataSummary').textContent='Last backed up from her phone: '+when;
+        const likes=Array.isArray(st.data.poolLikes)?st.data.poolLikes:[];
+        $('poolHints').innerHTML=likes.length?'💗 <b>She has hearted:</b> '+likes.map(esc).join(', '):'💗 Nothing hearted yet.';
         $('downloadData').onclick=()=>{
           const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),state:st.data},null,2)],{type:'application/json'});
           const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cloe-cozy-club-'+new Date().toISOString().slice(0,10)+'.json';a.click();

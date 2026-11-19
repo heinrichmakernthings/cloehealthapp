@@ -1,4 +1,4 @@
-// Cloe's Cozy Club — Worker backend
+// Cloe's Cozy Club: Worker backend
 // Static files live in /public. This Worker only handles /api/*.
 //
 //   GET  /api/config            public app settings (countdowns, rewards, coupons)
@@ -20,13 +20,40 @@ export const DEFAULT_CONFIG = {
     { emoji: '🎂', eyebrow: 'Big birthday incoming', title: "Cloe's 30th", date: '2027-07-15', yearly: false, copy: 'Thirty, gorgeous, and legally entitled to an unreasonable amount of birthday fuss.' }
   ],
   rewards: {
-    daily: 'Tiny cosy treat / matcha moment 🍵',
     tiers: [
       { every: 7, emoji: '🍵', label: 'Matcha date' },
+      { every: 14, emoji: '🎀', label: 'Surprise present' },
       { every: 30, emoji: '🍽️', label: 'Meal out' },
-      { every: 60, emoji: '🎁', label: 'Big present' }
+      { every: 60, emoji: '🎁', label: 'Big present' },
+      { every: 90, emoji: '🐱', label: 'Kitten', once: true }
     ]
   },
+  presentPool: [
+    {group:'Cosy',icon:'🧦',name:'Fluffy sock bundle',desc:'The thick, silly, bed-only kind'},
+    {group:'Cosy',icon:'🕯️',name:'Fancy candle',desc:'Something that smells like a spa'},
+    {group:'Cosy',icon:'🩷',name:'New pyjamas',desc:'Matching set, maximum softness'},
+    {group:'Cosy',icon:'♨️',name:'Hot water bottle',desc:'With a cute knitted cover'},
+    {group:'Treats',icon:'🥐',name:'Bakery run',desc:'Her pick, no portion commentary'},
+    {group:'Treats',icon:'🍵',name:'Matcha kit',desc:'Whisk, bowl and good powder'},
+    {group:'Treats',icon:'🍣',name:'Sushi night',desc:'Delivered to the sofa'},
+    {group:'Treats',icon:'🍬',name:'Pick and mix',desc:'A dangerously large bag'},
+    {group:'Cute things',icon:'🎁',name:'Blind-box figure',desc:'Mystery collectible, unbox together'},
+    {group:'Cute things',icon:'🎀',name:'Bag charm',desc:'Tiny, shiny, unnecessary'},
+    {group:'Cute things',icon:'🧸',name:'Squishy plush',desc:'A new friend for Bartholomew'},
+    {group:'Cute things',icon:'✏️',name:'Stationery haul',desc:'Stickers, pens, a pretty notebook'},
+    {group:'Gym girl',icon:'🧦',name:'Grip socks',desc:'In a colour she would never buy herself'},
+    {group:'Gym girl',icon:'🥤',name:'Cute shaker',desc:'Protein, but make it aesthetic'},
+    {group:'Gym girl',icon:'👟',name:'New gym set',desc:'Leggings and top, her choice'},
+    {group:'Gym girl',icon:'🧘',name:'Class together',desc:'Pilates, reformer or yoga, Sam included'},
+    {group:'Days out',icon:'💆',name:'Spa morning',desc:'Robe, pool, zero responsibilities'},
+    {group:'Days out',icon:'🎬',name:'Cinema date',desc:'Her film, all the snacks'},
+    {group:'Days out',icon:'🏺',name:'Pottery class',desc:'Make wonky mugs together'},
+    {group:'Days out',icon:'🧺',name:'Picnic day',desc:'Sam packs, Cloe relaxes'},
+    {group:'Wildcards',icon:'💐',name:'Flowers, just because',desc:'No occasion needed'},
+    {group:'Wildcards',icon:'🍳',name:'Breakfast in bed',desc:'With a tiny vase on the tray'},
+    {group:'Wildcards',icon:'🧹',name:'Chore-free day',desc:'Sam does everything. Everything.'},
+    {group:'Wildcards',icon:'❓',name:"Sam's mystery pick",desc:'He has been paying attention'}
+ ],
   coupons: [
     { id: 'tea', xp: 25, icon: '🫖', name: 'Tea in bed', desc: 'One tea delivery, no questions asked.' },
     { id: 'takeaway', xp: 60, icon: '🍜', name: 'Takeaway pick', desc: 'Cloe chooses. Sam cannot lobby.' },
@@ -121,8 +148,11 @@ function cleanConfig(c) {
     date: /^\d{4}-\d{2}-\d{2}$/.test(x.date) ? x.date : '', yearly: !!x.yearly, copy: str(x.copy, 240)
   })).filter(x => x.title && x.date);
   const tiers = (Array.isArray(c.rewards?.tiers) ? c.rewards.tiers : []).slice(0, 8).map(t => ({
-    every: Math.max(1, Math.min(365, Math.round(Number(t.every) || 0))), emoji: str(t.emoji, 8), label: str(t.label, 80)
+    every: Math.max(1, Math.min(365, Math.round(Number(t.every) || 0))), emoji: str(t.emoji, 8), label: str(t.label, 80), once: !!t.once
   })).filter(t => t.every && t.label);
+  const presentPool = (Array.isArray(c.presentPool) ? c.presentPool : []).slice(0, 80).map(x => ({
+    group: str(x.group, 40), icon: str(x.icon, 8), name: str(x.name, 60), desc: str(x.desc, 120)
+  })).filter(x => x.name);
   if (!tiers.length) throw new Error('Add at least one reward');
   const seen = new Set();
   const coupons = (Array.isArray(c.coupons) ? c.coupons : []).slice(0, 30).map(x => {
@@ -131,7 +161,7 @@ function cleanConfig(c) {
     seen.add(id);
     return { id, xp: Math.max(0, Math.round(Number(x.xp) || 0)), icon: str(x.icon, 8), name: str(x.name, 60), desc: str(x.desc, 160) };
   }).filter(x => x.id && x.name);
-  return { version: 1, countdowns, rewards: { daily: str(c.rewards?.daily, 120), tiers }, coupons };
+  return { version: 1, countdowns, rewards: { tiers }, coupons, presentPool };
 }
 
 function entryCounts(data) {
@@ -167,7 +197,7 @@ async function api(request, env, url) {
     const deny = await requireAdmin(request, env); if (deny) return deny;
     const body = await request.json().catch(() => ({}));
     const pin = String(body.newPin || '').trim();
-    if (!/^\d{4,12}$/.test(pin)) return json({ error: 'PIN must be 4–12 digits' }, 400);
+    if (!/^\d{4,12}$/.test(pin)) return json({ error: 'PIN must be 4 to 12 digits' }, 400);
     const salt = [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, '0')).join('');
     await setSetting(env, 'admin_pin_salt', salt);
     await setSetting(env, 'admin_pin_hash', await sha256(salt + ':' + pin));

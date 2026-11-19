@@ -66,7 +66,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
     </div>
     <a class="back" href="/" id="backLink">← Back to app</a>
   </div>
-  <p class="sub">Charts and patterns from everything logged. These are clues to discuss with a doctor — not a diagnosis. The more days logged, the more reliable they get.</p>
+  <p class="sub">Charts and patterns from everything logged. These are clues to discuss with a doctor, not a diagnosis. The more days logged, the more reliable they get.</p>
 
   <div id="pinGate" class="card pinbox" style="display:none">
     <p class="helper">Enter Sam's PIN to view the cloud copy.</p>
@@ -84,10 +84,10 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 
     <div class="card">
       <div class="tiles">
-        <div class="tile"><b id="tDays">–</b><span>days checked in</span></div>
-        <div class="tile"><b id="tFlares">–</b><span>flare logs</span></div>
-        <div class="tile"><b id="tGood">–</b><span>good / okay / bad days</span></div>
-        <div class="tile"><b id="tFood">–</b><span>meals logged</span></div>
+        <div class="tile"><b id="tDays">0</b><span>days checked in</span></div>
+        <div class="tile"><b id="tFlares">0</b><span>flare logs</span></div>
+        <div class="tile"><b id="tGood">0</b><span>good / okay / bad days</span></div>
+        <div class="tile"><b id="tFood">0</b><span>meals logged</span></div>
       </div>
     </div>
 
@@ -99,7 +99,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 
     <div class="card">
       <h2>📈 How symptoms have moved</h2>
-      <p class="helper">Daily check-in scores (0–10), smoothed over 7 days. Red triangles are days with a flare log. Pick up to 3.</p>
+      <p class="helper">Daily check-in scores (0 to 10), smoothed over 7 days. Red triangles are days with a flare log. Pick up to 3.</p>
       <div class="metricpick" id="trendPick"></div>
       <div class="chartbox"><canvas id="trendChart"></canvas></div>
     </div>
@@ -195,8 +195,8 @@ const dayDiff=(a,b)=>Math.round((parseDay(b)-parseDay(a))/86400000);
 const ts=(date,time)=>{const d=parseDay(date);if(!d)return null;const m=/^(\d{1,2}):(\d{2})/.exec(time||'');d.setHours(m?+m[1]:12,m?+m[2]:0,0,0);return d.getTime()};
 const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
 const cap=s=>String(s).charAt(0).toUpperCase()+String(s).slice(1);
-const fmt=(v,d=1)=>v==null?'–':v.toFixed(d);
-const pct=v=>v==null?'–':Math.round(v*100)+'%';
+const fmt=(v,d=1)=>v==null?'·':v.toFixed(d);
+const pct=v=>v==null?'·':Math.round(v*100)+'%';
 function pearson(xs,ys){
   const n=xs.length;if(n<3)return null;
   const mx=mean(xs),my=mean(ys);let sxy=0,sx=0,sy=0;
@@ -394,13 +394,13 @@ function renderCycle(D){
     options:baseOpts({plugins:{legend:{display:false},title:{display:true,text:'Flares per day in each phase',color:css('--ink'),font:{size:13,weight:'700'},align:'start'},
       tooltip:{...baseOpts().plugins.tooltip,callbacks:{label:c=>` ${flPer[c.dataIndex]} flares over ${daysPer[c.dataIndex]} days (${c.parsed.y} per day)`}}},
       scales:{x:{grid:{display:false},ticks:{color:css('--muted')}},y:{beginAtZero:true,grid:{color:css('--grid')},border:{display:false},ticks:{color:css('--muted')}}}})});
-  $('cycleNote').textContent=!known.length?'No cycle info yet — fill in the cycle tracker or the cycle stage on check-ins to unlock this.'
+  $('cycleNote').textContent=!known.length?'No cycle info yet. Fill in the cycle tracker or the cycle stage on check-ins to unlock this.'
     :est?`${est} of ${known.length} days have their phase estimated from the last period start and usual cycle length, so treat those as approximate.`:'';
   return {known,daysPer,flPer,rate};
 }
 
 function renderFlares(D){
-  const buckets=[['Night','0–6',0,6],['Morning','6–10',6,10],['Late morning','10–13',10,13],['Afternoon','13–17',13,17],['Evening','17–21',17,21],['Late','21–24',21,24]];
+  const buckets=[['Night','0 to 6',0,6],['Morning','6 to 10',6,10],['Late morning','10 to 13',10,13],['Afternoon','13 to 17',13,17],['Evening','17 to 21',17,21],['Late','21 to 24',21,24]];
   const counts=buckets.map(b=>D.flares.filter(f=>{const m=/^(\d{1,2})/.exec(f.time||'');if(!m)return false;const h=+m[1];return h>=b[2]&&h<b[3]}).length);
   draw('flareTimeChart',{type:'bar',data:{labels:buckets.map(b=>b[0]),datasets:[{label:'Flare logs',data:counts,backgroundColor:css('--flare'),borderRadius:4,borderSkipped:'bottom',maxBarThickness:36}]},
     options:baseOpts({plugins:{legend:{display:false},title:{display:true,text:'Time of day',color:css('--ink'),font:{size:13,weight:'700'},align:'start'},tooltip:{...baseOpts().plugins.tooltip,callbacks:{title:c=>`${buckets[c[0].dataIndex][0]} (${buckets[c[0].dataIndex][1]}h)`}}},
@@ -415,12 +415,12 @@ function renderFlares(D){
   const side=count('painSide'),helped=words('helped'),first=words('firstSymptom');
   const longGap=lastAte.length?lastAte.filter(v=>v>=4).length/lastAte.length:null;
   $('flareFacts').innerHTML=`<table>
-    <tr><th>Typical length</th><td class="num">${avgDur?Math.round(avgDur)+' min':'–'}</td></tr>
-    <tr><th>Hours since food (avg)</th><td class="num">${lastAte.length?fmt(mean(lastAte))+' h':'–'}${longGap!=null?` · ${pct(longGap)} were 4h+ after eating`:''}</td></tr>
-    <tr><th>Most common symptoms (4+/10)</th><td>${sym.slice(0,4).map(s=>`${esc(s.l)} <span class="tag">${pct(s.often)}</span>`).join(' ')||'–'}</td></tr>
-    <tr><th>First symptom noticed</th><td>${first.map(([w,n])=>`${esc(w)} (${n})`).join(', ')||'–'}</td></tr>
-    <tr><th>Pain location</th><td>${side.map(([w,n])=>`${esc(w)} (${n})`).join(', ')||'–'}</td></tr>
-    <tr><th>What helped</th><td>${helped.map(([w,n])=>`${esc(w)} (${n})`).join(', ')||'–'}</td></tr>
+    <tr><th>Typical length</th><td class="num">${avgDur?Math.round(avgDur)+' min':'·'}</td></tr>
+    <tr><th>Hours since food (avg)</th><td class="num">${lastAte.length?fmt(mean(lastAte))+' h':'·'}${longGap!=null?` · ${pct(longGap)} were 4h+ after eating`:''}</td></tr>
+    <tr><th>Most common symptoms (4+/10)</th><td>${sym.slice(0,4).map(s=>`${esc(s.l)} <span class="tag">${pct(s.often)}</span>`).join(' ')||'·'}</td></tr>
+    <tr><th>First symptom noticed</th><td>${first.map(([w,n])=>`${esc(w)} (${n})`).join(', ')||'·'}</td></tr>
+    <tr><th>Pain location</th><td>${side.map(([w,n])=>`${esc(w)} (${n})`).join(', ')||'·'}</td></tr>
+    <tr><th>What helped</th><td>${helped.map(([w,n])=>`${esc(w)} (${n})`).join(', ')||'·'}</td></tr>
   </table>`;
   return {avgDur,lastAte,sym,side,helped,first,longGap};
 }
@@ -466,28 +466,28 @@ function renderFindings(D,corr,cyc,ft){
   corr.slice(0,8).forEach(c=>items.push({ic:c.lag?'⏭️':'🔗',t:corrSentence(c),d:`Correlation ${c.r.toFixed(2)} over ${c.n} days. ${Math.abs(c.r)>=0.5?'Strong link.':'Moderate link.'}`,
     w:Math.abs(c.r)*((CAUSES.has(c.a)||CAUSES.has(c.b))?1:0.6)}));
   // food
-  (ft.rows||[]).filter(r=>r.lift>=1.5&&r.n>=4).slice(0,3).forEach(r=>items.push({ic:'🍜',t:`Symptoms are more likely after ${r.item}`,d:`${pct(r.rateWith)} of ${r.n} meals vs ${pct(r.rateWithout)} without it${r.n<8?' — early hint, keep logging':''}.`,w:Math.min(1,(r.lift-1)/3)*(r.n>=8?1:.7)}));
+  (ft.rows||[]).filter(r=>r.lift>=1.5&&r.n>=4).slice(0,3).forEach(r=>items.push({ic:'🍜',t:`Symptoms are more likely after ${r.item}`,d:`${pct(r.rateWith)} of ${r.n} meals vs ${pct(r.rateWithout)} without it${r.n<8?'. Early hint, keep logging':''}.`,w:Math.min(1,(r.lift-1)/3)*(r.n>=8?1:.7)}));
   // sleep
   items.sort((a,b)=>b.w-a.w);
   const enough=D.days.length;
   $('findings').innerHTML=items.length?items.slice(0,8).map(f=>`<div class="finding"><div class="ic">${f.ic}</div><div><b>${esc(f.t)}</b><small>${esc(f.d)}</small><div class="meter" aria-hidden="true"><i style="width:${Math.round(Math.max(.15,f.w)*100)}%"></i></div></div></div>`).join('')
-    :`<div class="empty">${enough<10?`Not enough data yet — patterns usually start showing after about 2 weeks of check-ins (${enough} day${enough===1?'':'s'} so far in this range).`:'No strong patterns in this date range yet. Try “Everything”.'}</div>`;
+    :`<div class="empty">${enough<10?`Not enough data yet. Patterns usually start showing after about 2 weeks of check-ins (${enough} day${enough===1?'':'s'} so far in this range).`:'No strong patterns in this date range yet. Try “Everything”.'}</div>`;
   return items;
 }
 
 function renderDoctor(D,corr,cyc,ft,flareInfo,findings){
   const first=D.days[0]?.date||D.flares[0]?.date, last=D.days[D.days.length-1]?.date;
-  const range=first?`${parseDay(first).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})} – ${parseDay(last||first).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`:'No data';
+  const range=first?`${parseDay(first).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})} to ${parseDay(last||first).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`:'No data';
   const symRows=DAILY_METRICS.map(([k,l,good])=>{const v=D.days.map(r=>r[k]).filter(v=>v!=null);if(!v.length)return null;return {l,avg:mean(v),hi:good?v.filter(x=>x<=3).length/v.length:v.filter(x=>x>=6).length/v.length,good}}).filter(Boolean);
   const sleep=D.days.map(r=>r.sleepHours).filter(v=>v!=null);
   const flareRows=[...D.flares].sort((a,b)=>(b._t||0)-(a._t||0)).slice(0,25);
   const html=`
     <p style="margin:8px 0 0"><b>Period covered:</b> ${esc(range)}<br>
     <b>Logged:</b> ${D.days.length} daily check-ins · ${D.food.length} meals · ${D.flares.length} flare episodes${sleep.length?` · average sleep ${fmt(mean(sleep))} h`:''}</p>
-    <h3>Symptom scores (0–10, from daily check-ins)</h3>
+    <h3>Symptom scores (0 to 10, from daily check-ins)</h3>
     ${symRows.length?`<table><thead><tr><th>Symptom</th><th class="num">Average</th><th class="num">Days ${'≥'}6 (or ≤3 for energy/sleep)</th></tr></thead><tbody>${symRows.map(s=>`<tr><td>${esc(s.l)}</td><td class="num">${fmt(s.avg)}</td><td class="num">${pct(s.hi)}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">No check-ins in this range.</div>'}
     <h3>Patterns noticed</h3>
-    ${findings.length?`<ul>${findings.slice(0,8).map(f=>`<li>${esc(f.t)} — ${esc(f.d)}</li>`).join('')}</ul>`:'<div class="empty">Not enough data for patterns yet.</div>'}
+    ${findings.length?`<ul>${findings.slice(0,8).map(f=>`<li>${esc(f.t)}: ${esc(f.d)}</li>`).join('')}</ul>`:'<div class="empty">Not enough data for patterns yet.</div>'}
     ${flareInfo.sym?`<h3>Flare episodes</h3><ul>
       ${flareInfo.avgDur?`<li>Typical duration about ${Math.round(flareInfo.avgDur)} minutes.</li>`:''}
       ${flareInfo.lastAte?.length?`<li>On average ${fmt(mean(flareInfo.lastAte))} hours since last food${flareInfo.longGap!=null?` (${pct(flareInfo.longGap)} were 4+ hours after eating)`:''}.</li>`:''}
