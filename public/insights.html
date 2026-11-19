@@ -63,7 +63,16 @@ a.back{min-height:40px;display:inline-flex;align-items:center}
 #docSummary h3{font-size:15px;margin:16px 0 6px}
 #docSummary ul{margin:0;padding-left:18px;font-size:14px;line-height:1.5}
 @media(max-width:560px){.tiles{grid-template-columns:repeat(2,1fr)}.chartbox{height:230px}}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;margin:0 auto;max-width:820px;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;
+  padding:6px 8px calc(6px + env(safe-area-inset-bottom));background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);box-shadow:0 -6px 24px rgba(85,60,80,.07)}
+.tabbar a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);text-decoration:none;font-size:11px;font-weight:750;min-height:52px;border-radius:14px;-webkit-tap-highlight-color:transparent}
+.tabbar .ti{font-size:21px;line-height:1;filter:grayscale(.35)}
+.tabbar a.active{color:var(--ink);background:var(--pink)}.tabbar a.active .ti{filter:none}
+.app{padding-bottom:calc(90px + env(safe-area-inset-bottom))}
+body:not(.adminview) #backLink{display:none}
+body.adminview .tabbar{display:none}
 @media print{
+  .tabbar{display:none!important}
   body{background:#fff}.app{max-width:none;padding:0}
   .card{box-shadow:none;border:0;padding:0;margin:0}
   body.printing .app > *:not(#doctorCard){display:none!important}
@@ -78,7 +87,7 @@ a.back{min-height:40px;display:inline-flex;align-items:center}
       <div class="eyebrow" id="sourceLabel">Cloe's clues</div>
       <h1>✨ Insights</h1>
     </div>
-    <a class="back" href="/" id="backLink">← Back to app</a>
+    <a class="back" href="/" id="backLink">← App</a>
   </div>
   <p class="sub">Charts and patterns from everything logged. These are clues to discuss with a doctor, not a diagnosis. The more days logged, the more reliable they get.</p>
 
@@ -150,6 +159,13 @@ a.back{min-height:40px;display:inline-flex;align-items:center}
     </div>
   </div>
 </div>
+<nav class="tabbar" id="tabbar" aria-label="Sections">
+  <a href="/"><span class="ti">🏠</span>Home</a>
+  <a href="/#daily"><span class="ti">🌤</span>Daily</a>
+  <a href="/#food"><span class="ti">🍜</span>Food</a>
+  <a href="/#flare"><span class="ti">🫶</span>Flare</a>
+  <a href="/insights" class="active" aria-current="page"><span class="ti">✨</span>Insights</a>
+</nav>
 
 <script>
 (function(){
@@ -171,7 +187,7 @@ const charts={};
 // ---------- load data ----------
 const params=new URLSearchParams(location.search);
 const isAdmin=params.get('view')==='admin';
-if(isAdmin){$('backLink').href='/admin';$('backLink').textContent='← Sam\'s controls';$('sourceLabel').textContent='Cloud copy · Sam\'s view'}
+if(isAdmin){document.body.classList.add('adminview');$('backLink').href='/admin';$('backLink').textContent='← Sam\'s controls';$('sourceLabel').textContent='Cloud copy · Sam\'s view'}
 async function load(){
   if(isAdmin){
     const pin=sessionStorage.getItem('cozyAdminPin');

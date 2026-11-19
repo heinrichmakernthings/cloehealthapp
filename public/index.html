@@ -593,7 +593,7 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
 .tabbar button.active .ti{filter:none;transform:scale(1.1)}
 .more-menu{position:fixed;left:0;right:0;margin:0 auto;max-width:744px;bottom:calc(72px + env(safe-area-inset-bottom));z-index:19999;width:calc(100% - 16px);
   border-radius:20px;box-shadow:0 -10px 40px rgba(85,60,80,.16);padding:10px}
-.more-menu.show{grid-template-columns:repeat(4,1fr);animation:popIn .18s ease both}
+.more-menu.show{grid-template-columns:repeat(3,1fr);animation:popIn .18s ease both}
 .more-menu button,.more-menu .more-link{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:68px;border:1px solid var(--line);border-radius:14px;background:#fff;
   font-weight:750;font-size:13px;color:var(--ink);text-decoration:none}
 .more-menu .ti{font-size:22px}
@@ -664,7 +664,7 @@ details.fold[open] summary{margin-bottom:6px}
     </div>
     <div class="charm-strip">
       <button type="button" class="charm" data-go="rewards" title="Open Treats">🐱 Kitten goal</button>
-      <button type="button" class="charm" data-go="patterns" title="Open Clues">🍵 Matcha energy</button>
+      <a class="charm" href="/insights" title="Open insights" style="text-decoration:none;color:inherit">✨ My insights</a>
       <button type="button" class="charm" id="biscuitsChip" title="Tap Biscuits">🐾 Biscuits approved</button>
       <button type="button" class="charm" data-go="rewards" title="Open streak rewards">🏋️ Strong girl streak</button>
     </div>
@@ -903,46 +903,7 @@ details.fold[open] summary{margin-bottom:6px}
     </form>
   </section>
 
-  <section class="panel" id="patterns">
-    <a class="insights-cta" href="/insights">
-      <span class="ic">✨</span>
-      <span><b>Smart insights &amp; charts</b><small>Patterns, food triggers, cycle links and a doctor summary</small></span>
-      <span class="go">→</span>
-    </a>
-<div class="weekly-postcard">
-        <div class="eyebrow">This week's postcard 💌</div>
-        
-        <b id="postcardTitle">Biscuits is compiling the paperwork...</b>
-        <div class="postcard-grid">
-          <div class="postcard-cell"><b id="postDaily">0</b><span>check-ins</span></div>
-          <div class="postcard-cell"><b id="postFood">0</b><span>food logs</span></div>
-          <div class="postcard-cell"><b id="postFlare">0</b><span>flares</span></div>
-        </div>
-        <div class="helper" id="postcardVerdict" style="margin:9px 0 0">Biscuits verdict pending.</div>
-        <div class="streak-pass">🐾 Biscuits pass: <span id="streakPassCount">0</span> available</div>
-      </div>
 
-
-    <div class="card">
-      <h2>📊 Cloe's clues</h2>
-      <p class="helper">Simple clues from the last 30 days. These are associations, not diagnoses.</p>
-      <div class="matcha-card">
-        <div class="matcha-cup"><div class="matcha-fill" id="matchaFill"><div class="matcha-foam"></div></div><div class="handle"></div></div>
-        <div>
-          <b id="matchaTitle">Weekly matcha meter</b>
-          <div class="helper" id="matchaText" style="margin:4px 0 0">Each daily check-in fills the cup a little.</div>
-          <div class="star-row" id="strengthStars"></div>
-        </div>
-      </div>
-      <div class="mini" style="margin-top:12px">
-        <div class="metric"><b id="pDays">0</b><span>daily logs</span></div>
-        <div class="metric"><b id="pMeals">0</b><span>food logs</span></div>
-        <div class="metric"><b id="pFlares">0</b><span>flare logs</span></div>
-      </div>
-      <div class="history" id="patternText" style="margin-top:12px"></div>
-    </div>
-    <div class="card"><h2>Recent check-ins</h2><div class="history" id="recent"></div></div>
-  </section>
 
 
   <section class="panel" id="data">
@@ -1005,6 +966,7 @@ details.fold[open] summary{margin-bottom:6px}
     <div class="card">
       <h2>🎁 Cloe's reward shelf</h2>
       <p class="helper" id="rewardShelfHelper">The shelf fills up just for showing up, never for having a “good” symptom day. Matcha date every 7 days, a meal out every 30 days, and a big present every 60 days. They keep coming round as long as the streak keeps going.</p>
+      <div class="streak-pass" style="margin:0 0 10px">🐾 Biscuits pass: <span id="streakPassCount">0</span> available <small style="color:var(--muted)">(forgives one missed day, earned every 14 days)</small></div>
       <div class="reward-list" id="rewardList"></div>
 <div class="goal-card">
   <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj4KPGRlZnM+PHJhZGlhbEdyYWRpZW50IGlkPSJiZyIgY3g9IjUwJSIgY3k9IjQ1JSIgcj0iNjAlIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmYyZGMiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmZmRkZWEiLz48L3JhZGlhbEdyYWRpZW50PjwvZGVmcz4KPGNpcmNsZSBjeD0iMTAwIiBjeT0iMTAwIiByPSI5NiIgZmlsbD0idXJsKCNiZykiLz4KPGVsbGlwc2UgY3g9IjEwMCIgY3k9IjE3NiIgcng9IjU4IiByeT0iOCIgZmlsbD0iI2U4YzlkNCIgb3BhY2l0eT0iLjYiLz4KPHBhdGggZD0iTTU4IDE3MmMtNi0zMCA0LTYyIDQyLTYyczQ4IDMyIDQyIDYyeiIgZmlsbD0iI2Y2YzI4YiIvPgo8cGF0aCBkPSJNODQgMTcyYy0yLTE4IDQtMzQgMTYtMzRzMTggMTYgMTYgMzR6IiBmaWxsPSIjZmZmNmVhIi8+CjxwYXRoIGQ9Ik0xNDAgMTY2YzIyIDIgMzItMTYgMjQtMzAiIHN0cm9rZT0iI2Y2YzI4YiIgc3Ryb2tlLXdpZHRoPSIxMiIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CjxwYXRoIGQ9Ik0xNTAgMTUwYzYtNCAxMC04IDEyLTE0IiBzdHJva2U9IiNlOWE5NmEiIHN0cm9rZS13aWR0aD0iNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CjxlbGxpcHNlIGN4PSI4MCIgY3k9IjE3MiIgcng9IjEzIiByeT0iNyIgZmlsbD0iI2ZmZjZlYSIvPjxlbGxpcHNlIGN4PSIxMjAiIGN5PSIxNzIiIHJ4PSIxMyIgcnk9IjciIGZpbGw9IiNmZmY2ZWEiLz4KPHBhdGggZD0iTTUwIDcwIDU2IDI4IDg2IDUyeiIgZmlsbD0iI2Y2YzI4YiIvPjxwYXRoIGQ9Ik0xNTAgNzAgMTQ0IDI4IDExNCA1MnoiIGZpbGw9IiNmNmMyOGIiLz4KPHBhdGggZD0iTTU4IDYwIDYxIDM4IDc3IDUxeiIgZmlsbD0iI2ZmYjZjOCIvPjxwYXRoIGQ9Ik0xNDIgNjAgMTM5IDM4IDEyMyA1MXoiIGZpbGw9IiNmZmI2YzgiLz4KPGVsbGlwc2UgY3g9IjEwMCIgY3k9IjgyIiByeD0iNTQiIHJ5PSI0NiIgZmlsbD0iI2Y2YzI4YiIvPgo8cGF0aCBkPSJNODggNDBjNCA4IDQgMTQgMCAyME0xMDAgMzh2MjJNMTEyIDQwYy00IDgtNCAxNCAwIDIwIiBzdHJva2U9IiNlOWE5NmEiIHN0cm9rZS13aWR0aD0iNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIi8+CjxlbGxpcHNlIGN4PSIxMDAiIGN5PSIxMDAiIHJ4PSIzMCIgcnk9IjIyIiBmaWxsPSIjZmZmNmVhIi8+CjxlbGxpcHNlIGN4PSI4MCIgY3k9Ijg0IiByeD0iOCIgcnk9IjEwIiBmaWxsPSIjM2YzOTQwIi8+PGVsbGlwc2UgY3g9IjEyMCIgY3k9Ijg0IiByeD0iOCIgcnk9IjEwIiBmaWxsPSIjM2YzOTQwIi8+CjxjaXJjbGUgY3g9IjgzIiBjeT0iODAiIHI9IjMiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIxMjMiIGN5PSI4MCIgcj0iMyIgZmlsbD0iI2ZmZiIvPgo8Y2lyY2xlIGN4PSI3OCIgY3k9Ijg4IiByPSIxLjYiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIxMTgiIGN5PSI4OCIgcj0iMS42IiBmaWxsPSIjZmZmIi8+CjxlbGxpcHNlIGN4PSI2NiIgY3k9Ijk4IiByeD0iOCIgcnk9IjUiIGZpbGw9IiNmZjlmYjgiIG9wYWNpdHk9Ii43Ii8+PGVsbGlwc2UgY3g9IjEzNCIgY3k9Ijk4IiByeD0iOCIgcnk9IjUiIGZpbGw9IiNmZjlmYjgiIG9wYWNpdHk9Ii43Ii8+CjxwYXRoIGQ9Ik05NSA5NWgxMGwtNSA1eiIgZmlsbD0iI2ZmOGZhYiIvPgo8cGF0aCBkPSJNMTAwIDEwMGMtMiA1LTggNi0xMSAzTTEwMCAxMDBjMiA1IDggNiAxMSAzIiBzdHJva2U9IiMzZjM5NDAiIHN0cm9rZS13aWR0aD0iMi40IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPHBhdGggZD0iTTcwIDEwMEg0NE03MCAxMDVsLTI0IDZNMTMwIDEwMGgyNk0xMzAgMTA1bDI0IDYiIHN0cm9rZT0iI2M5OGM1NSIgc3Ryb2tlLXdpZHRoPSIxLjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8cGF0aCBkPSJNNzggMTI0YzggNiAzNiA2IDQ0IDAiIHN0cm9rZT0iI2ZmOGZhYiIgc3Ryb2tlLXdpZHRoPSI3IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPHBhdGggZD0iTTEwMCAxMjhsLTE0LTl2MTh6TTEwMCAxMjhsMTQtOXYxOHoiIGZpbGw9IiNmZjhmYWIiLz48Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMjgiIHI9IjQuNSIgZmlsbD0iI2ZmNmY5NiIvPgo8cGF0aCBkPSJNMTUwIDQwbDMgNyA3IDMtNyAzLTMgNy0zLTctNy0zIDctM3oiIGZpbGw9IiNmMGM4NmIiLz48cGF0aCBkPSJNNDAgMTIwbDIgNSA1IDItNSAyLTIgNS0yLTUtNS0yIDUtMnoiIGZpbGw9IiNmMGM4NmIiLz4KPC9zdmc+Cg==" alt="Cute ginger kitten with a pink bow" width="120" height="120">
@@ -1135,7 +1097,6 @@ details.fold[open] summary{margin-bottom:6px}
     <button type="button" id="moreToggle" aria-expanded="false"><span class="ti">☰</span>More</button>
   </nav>
   <div class="more-menu" id="moreMenu">
-    <button type="button" data-go="patterns"><span class="ti">🔎</span>Clues</button>
     <a class="more-link" href="/insights"><span class="ti">✨</span>Insights</a>
     <button type="button" data-go="rewards"><span class="ti">🎁</span>Treats</button>
     <button type="button" data-go="data"><span class="ti">📊</span>Data</button>
@@ -1467,10 +1428,10 @@ details.fold[open] summary{margin-bottom:6px}
    }
    if(id==='home'){refreshCoreHome();renderHomeRecent();renderGameBits();renderCycleTracker();}
    if(id==='daily')syncCycleIntoDailyForm();
-   if(id==='patterns')renderCluesPanel();
+   if(id==='patterns'){location.href='/insights';return}
    if(id==='data')renderDataDashboard(streak());
    if(mt){
-     const labels={patterns:['🔎','Clues'],rewards:['🎁','Treats'],data:['📊','Data']};
+     const labels={rewards:['🎁','Treats'],data:['📊','Data']};
      const l=labels[id]||['☰','More'];
      mt.innerHTML=`<span class="ti">${l[0]}</span>${l[1]}`;
      mt.classList.toggle('active',!!labels[id]);
@@ -3020,7 +2981,7 @@ details.fold[open] summary{margin-bottom:6px}
    const d30=daily.filter(x=>x&&x.date>=c30&&x.date<=upper30);
    const f30=food.filter(x=>x&&x.date>=c30&&x.date<=upper30);
    const fl30=flare.filter(x=>x&&x.date>=c30&&x.date<=upper30);
-   document.getElementById('pDays').textContent=d30.length;document.getElementById('pMeals').textContent=f30.length;document.getElementById('pFlares').textContent=fl30.length;
+   setText('pDays',d30.length);setText('pMeals',f30.length);setText('pFlares',fl30.length);
    let pats=[];
    if(d30.length){
      const avg=n=>{const vals=d30.map(x=>x[n]===''||x[n]==null?NaN:Number(x[n])).filter(Number.isFinite);return vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1):'·'};
@@ -3035,9 +2996,9 @@ details.fold[open] summary{margin-bottom:6px}
      const stages={};fl30.forEach(x=>stages[x.cycleStage]=(stages[x.cycleStage]||0)+1);
      const top=Object.entries(stages).sort((a,b)=>b[1]-a[1])[0]; if(top)pats.push(`Most flare logs occurred during: ${top[0]} (${top[1]})`);
    }
-   document.getElementById('patternText').innerHTML=(pats.length?pats:['Keep logging gently. Patterns will appear here over time.']).map(x=>`<div class="item">${escapeHtml(x)}</div>`).join('');
+   if(document.getElementById('patternText'))document.getElementById('patternText').innerHTML=(pats.length?pats:['Keep logging gently. Patterns will appear here over time.']).map(x=>`<div class="item">${escapeHtml(x)}</div>`).join('');
    const recent=[...daily.map(x=>({...x,_t:'Daily'})),...food.map(x=>({...x,_t:'Food'})),...flare.map(x=>({...x,_t:'Flare'}))].sort((a,b)=>(b.savedAt||'').localeCompare(a.savedAt||'')).slice(0,8);
-   document.getElementById('recent').innerHTML=recent.length?recent.map(x=>`<div class="item"><div class="item-top"><b>${escapeHtml(x._t)}</b><small>${escapeHtml(x.date||'')} ${escapeHtml(x.time||'')}</small></div><small>${escapeHtml(x._t==='Daily'?(x.overall||''):(x._t==='Food'?(x.food||''):(x.firstSymptom||x.activity||'')))}</small></div>`).join(''):'<div class="item"><small>No entries yet.</small></div>';
+   if(document.getElementById('recent'))document.getElementById('recent').innerHTML=recent.length?recent.map(x=>`<div class="item"><div class="item-top"><b>${escapeHtml(x._t)}</b><small>${escapeHtml(x.date||'')} ${escapeHtml(x.time||'')}</small></div><small>${escapeHtml(x._t==='Daily'?(x.overall||''):(x._t==='Food'?(x.food||''):(x.firstSymptom||x.activity||'')))}</small></div>`).join(''):'<div class="item"><small>No entries yet.</small></div>';
    document.getElementById('rewardList').innerHTML=ms.map(m=>{
       const label=m.t;
       if(m.once) return `<div class="reward ${s>=m.d?'done':''}"><div><b>${m.e} Day ${m.d}</b><br><small>${label}, once</small></div><span class="rw-status">${s>=m.d?'<b>✓</b><small>unlocked</small>':`<b>${m.d-s}</b><small>to go</small>`}</span></div>`;
@@ -3463,6 +3424,7 @@ details.fold[open] summary{margin-bottom:6px}
  initCloud();
 
  safeRender();refreshAllPanels();
+ (function openFromHash(){const h=(location.hash||'').slice(1);if(['daily','food','flare','rewards','data'].includes(h)){showTab(h);history.replaceState(null,'',location.pathname+location.search)}})();
 })();
 </script>
 </body>
