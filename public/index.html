@@ -593,7 +593,7 @@ button.present{flex-direction:column;align-items:flex-start;gap:6px;padding:11px
 .tabbar button.active .ti{filter:none;transform:scale(1.1)}
 .more-menu{position:fixed;left:0;right:0;margin:0 auto;max-width:744px;bottom:calc(72px + env(safe-area-inset-bottom));z-index:19999;width:calc(100% - 16px);
   border-radius:20px;box-shadow:0 -10px 40px rgba(85,60,80,.16);padding:10px}
-.more-menu.show{grid-template-columns:repeat(3,1fr);animation:popIn .18s ease both}
+.more-menu.show{grid-template-columns:repeat(4,1fr);animation:popIn .18s ease both}
 .more-menu button,.more-menu .more-link{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:68px;border:1px solid var(--line);border-radius:14px;background:#fff;
   font-weight:750;font-size:13px;color:var(--ink);text-decoration:none}
 .more-menu .ti{font-size:22px}
@@ -641,6 +641,28 @@ details.fold[open] summary{margin-bottom:6px}
 .coupon button,.log-action,.recent-edit,[data-home-edit]{min-height:38px;padding-left:12px;padding-right:12px}
 .coupon small,.achievement small{font-size:12px}
 .countdown-tap{font-size:12px}
+
+/* ---- nav v2 + log switch + feedback ---- */
+.tabbar .tab-link{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);text-decoration:none;font-size:11px;font-weight:750;min-height:52px;border-radius:14px;-webkit-tap-highlight-color:transparent}
+.tabbar .tab-link .ti{font-size:21px;line-height:1;filter:grayscale(.35)}
+.log-switch{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:12px;padding:4px;background:#fff;border:1px solid var(--line);border-radius:16px;position:sticky;top:8px;z-index:5;box-shadow:0 4px 14px rgba(85,60,80,.06)}
+.log-switch button{border:0;background:none;border-radius:12px;min-height:42px;font-weight:800;font-size:14px;color:var(--muted)}
+.log-switch button.on{background:var(--ink);color:#fff}
+.fb-backdrop{position:fixed;inset:0;background:rgba(63,57,64,.35);z-index:40000;opacity:0;pointer-events:none;transition:opacity .2s}
+.fb-backdrop.show{opacity:1;pointer-events:auto}
+.fb-sheet{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:620px;z-index:40001;background:#fff;border-radius:24px 24px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom));
+  box-shadow:0 -14px 50px rgba(85,60,80,.25);transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.9,.3,1)}
+.fb-sheet.show{transform:translateY(0)}
+.fb-grab{width:44px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+.fb-sheet h2{margin:0;font-size:20px}
+.fb-kinds{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.fb-kind{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-weight:750;font-size:13px;min-height:40px;color:var(--ink)}
+.fb-kind.on{background:var(--pink);border-color:#f0a9c2}
+.fb-sheet textarea{width:100%;min-height:120px;font-size:16px;border:1px solid var(--line);border-radius:14px;padding:12px;resize:vertical}
+.fb-actions{display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:10px}
+.fb-cancel,.fb-send{min-height:48px;border-radius:14px;font-weight:800;border:1px solid var(--line);background:#fff;color:var(--ink)}
+.fb-send{background:var(--ink);color:#fff;border-color:var(--ink)}
+.fb-home{margin-top:12px;border:1px solid rgba(63,57,64,.12);background:rgba(255,255,255,.7);border-radius:999px;padding:9px 14px;font-weight:750;min-height:42px;color:var(--ink)}
 </style>
 </head>
 <body>
@@ -794,10 +816,16 @@ details.fold[open] summary{margin-bottom:6px}
     <div style="font-size:22px;margin-bottom:4px">💌</div>
     <b style="font-size:16px">I love you &amp; your FAT BUM 🍑</b>
     <div class="helper" style="margin:4px 0 0">from Sam x</div>
+    <button type="button" class="fb-home" data-feedback="1">💌 Send Sam feedback</button>
   </div>
 </section>
 
   <section class="panel" id="daily">
+    <div class="log-switch" role="tablist" aria-label="What to log">
+      <button type="button" data-go="daily" class="on" role="tab" aria-selected="true">🌤 Check-in</button>
+      <button type="button" data-go="food" class="" role="tab" aria-selected="false">🍜 Food</button>
+      <button type="button" data-go="flare" class="" role="tab" aria-selected="false">🫶 Flare</button>
+    </div>
     <form class="card" id="dailyForm">
       <h2>🌤 How am I today?</h2>
       <p class="helper">Consistency earns the streak. The answers themselves never affect rewards.</p>
@@ -825,6 +853,11 @@ details.fold[open] summary{margin-bottom:6px}
   </section>
 
   <section class="panel" id="food">
+    <div class="log-switch" role="tablist" aria-label="What to log">
+      <button type="button" data-go="daily" class="" role="tab" aria-selected="false">🌤 Check-in</button>
+      <button type="button" data-go="food" class="on" role="tab" aria-selected="true">🍜 Food</button>
+      <button type="button" data-go="flare" class="" role="tab" aria-selected="false">🫶 Flare</button>
+    </div>
     <form class="card" id="foodForm">
       <h2>🍜 Food + IBS log</h2>
       <div class="editing-banner" id="foodEditingBanner">
@@ -870,6 +903,11 @@ details.fold[open] summary{margin-bottom:6px}
   </section>
 
   <section class="panel" id="flare">
+    <div class="log-switch" role="tablist" aria-label="What to log">
+      <button type="button" data-go="daily" class="" role="tab" aria-selected="false">🌤 Check-in</button>
+      <button type="button" data-go="food" class="" role="tab" aria-selected="false">🍜 Food</button>
+      <button type="button" data-go="flare" class="on" role="tab" aria-selected="true">🫶 Flare</button>
+    </div>
     <div class="danger"><b>Important:</b> severe or rapidly worsening pelvic/abdominal pain, sudden severe one-sided pain, fainting/collapse, persistent confusion, repeated vomiting, breathing difficulty/chest pain, heavy vaginal bleeding, fever with significant pelvic pain, or severe weakness should be assessed urgently rather than just logged.</div>
     <form class="card" id="flareForm">
       <h2>🫶 I feel a bit rubbish</h2>
@@ -1091,15 +1129,32 @@ details.fold[open] summary{margin-bottom:6px}
   </div>
   <nav class="nav tabbar" aria-label="Sections">
     <button data-tab="home" class="active"><span class="ti">🏠</span>Home</button>
-    <button data-tab="daily"><span class="ti">🌤</span>Daily</button>
-    <button data-tab="food"><span class="ti">🍜</span>Food</button>
-    <button data-tab="flare"><span class="ti">🫶</span>Flare</button>
+    <button data-tab="daily" data-group="log"><span class="ti">🌤</span>Log</button>
+    <a class="tab-link" href="/insights"><span class="ti">✨</span>Insights</a>
+    <button data-tab="rewards"><span class="ti">🎁</span>Treats</button>
     <button type="button" id="moreToggle" aria-expanded="false"><span class="ti">☰</span>More</button>
   </nav>
   <div class="more-menu" id="moreMenu">
-    <a class="more-link" href="/insights"><span class="ti">✨</span>Insights</a>
-    <button type="button" data-go="rewards"><span class="ti">🎁</span>Treats</button>
+    <button type="button" data-go="food"><span class="ti">🍜</span>Food</button>
+    <button type="button" data-go="flare"><span class="ti">🫶</span>Flare</button>
     <button type="button" data-go="data"><span class="ti">📊</span>Data</button>
+    <button type="button" data-feedback="1"><span class="ti">💌</span>Feedback</button>
+  </div>
+  <div class="fb-backdrop" id="fbBackdrop"></div>
+  <div class="fb-sheet" id="fbSheet" role="dialog" aria-modal="true" aria-labelledby="fbTitle">
+    <div class="fb-grab"></div>
+    <h2 id="fbTitle">💌 Tell Sam something</h2>
+    <p class="helper" style="margin:2px 0 10px">Ideas, things that annoy you, things you love. He reads every one.</p>
+    <div class="fb-kinds" role="radiogroup" aria-label="Type of feedback">
+      <button type="button" class="fb-kind on" data-kind="idea" role="radio" aria-checked="true">💡 Idea</button>
+      <button type="button" class="fb-kind" data-kind="bug" role="radio" aria-checked="false">🐛 Something's off</button>
+      <button type="button" class="fb-kind" data-kind="love" role="radio" aria-checked="false">💗 Love this</button>
+    </div>
+    <textarea id="fbText" maxlength="2000" placeholder="e.g. Can the food log remember my usual lunches?"></textarea>
+    <div class="fb-actions">
+      <button type="button" class="fb-cancel" id="fbCancel">Not now</button>
+      <button type="button" class="fb-send" id="fbSend">Send to Sam 💌</button>
+    </div>
   </div>
   <div class="toast" id="toast" aria-live="polite"></div>
 </div>
@@ -1420,9 +1475,9 @@ details.fold[open] summary{margin-bottom:6px}
 
  function showTab(id){
    document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===id));
-   document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));
+   document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===id||(x.dataset.group==='log'&&['daily','food','flare'].includes(id))));
    const mm=document.getElementById('moreMenu'),mt=document.getElementById('moreToggle');
-   if(mm&&mt&&['home','daily','food','flare'].includes(id)){
+   if(mm&&mt){
      mm.classList.remove('show');
      mt.setAttribute('aria-expanded','false');
    }
@@ -1431,7 +1486,7 @@ details.fold[open] summary{margin-bottom:6px}
    if(id==='patterns'){location.href='/insights';return}
    if(id==='data')renderDataDashboard(streak());
    if(mt){
-     const labels={rewards:['🎁','Treats'],data:['📊','Data']};
+     const labels={data:['📊','Data']};
      const l=labels[id]||['☰','More'];
      mt.innerHTML=`<span class="ti">${l[0]}</span>${l[1]}`;
      mt.classList.toggle('active',!!labels[id]);
@@ -3423,8 +3478,53 @@ details.fold[open] summary{margin-bottom:6px}
  refreshConfig();
  initCloud();
 
+ // ================= Feedback to Sam =================
+ let fbKind='idea';
+ function openFeedback(){
+   document.getElementById('moreMenu')?.classList.remove('show');
+   document.getElementById('fbBackdrop').classList.add('show');
+   document.getElementById('fbSheet').classList.add('show');
+   setTimeout(()=>document.getElementById('fbText').focus(),250);
+ }
+ function closeFeedback(){
+   document.getElementById('fbBackdrop').classList.remove('show');
+   document.getElementById('fbSheet').classList.remove('show');
+ }
+ async function sendQueuedFeedback(){
+   let q=[];try{q=JSON.parse(localStorage.getItem('cloeFeedbackQueue')||'[]')}catch(e){}
+   if(!q.length)return;
+   const left=[];
+   for(const f of q){try{const r=await fetch('/api/feedback',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(f)});if(!r.ok&&r.status>=500)left.push(f)}catch(e){left.push(f)}}
+   try{localStorage.setItem('cloeFeedbackQueue',JSON.stringify(left))}catch(e){}
+ }
+ document.addEventListener('click',e=>{if(e.target.closest('[data-feedback]')){e.preventDefault();openFeedback()}});
+ document.getElementById('fbBackdrop')?.addEventListener('click',closeFeedback);
+ document.getElementById('fbCancel')?.addEventListener('click',closeFeedback);
+ document.querySelectorAll('.fb-kind').forEach(b=>b.addEventListener('click',()=>{
+   fbKind=b.dataset.kind;
+   document.querySelectorAll('.fb-kind').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-checked',x===b?'true':'false')});
+ }));
+ document.getElementById('fbSend')?.addEventListener('click',async()=>{
+   const ta=document.getElementById('fbText'),btn=document.getElementById('fbSend');
+   const message=ta.value.trim(); if(!message){ta.focus();toast('Write a little something first 💌');return}
+   const item={kind:fbKind,message,context:`${document.querySelector('.panel.active')?.id||''} · ${new Date().toISOString().slice(0,16)}`};
+   btn.disabled=true;btn.textContent='Sending…';
+   let ok=false;
+   try{const r=await fetch('/api/feedback',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(item)});ok=r.ok;if(!ok&&r.status===429){const j=await r.json().catch(()=>({}));toast(j.error||'Try again later');btn.disabled=false;btn.textContent='Send to Sam 💌';return}}catch(e){}
+   if(!ok){let q=[];try{q=JSON.parse(localStorage.getItem('cloeFeedbackQueue')||'[]')}catch(e){};q.push(item);try{localStorage.setItem('cloeFeedbackQueue',JSON.stringify(q))}catch(e){}}
+   ta.value='';btn.disabled=false;btn.textContent='Send to Sam 💌';closeFeedback();
+   toast(ok?'Sent to Sam 💌 Biscuits has stamped it.':'Saved. It will send when you are back online 💌');
+   try{celebratePops()}catch(e){}
+ });
+ window.addEventListener('online',sendQueuedFeedback);
+ sendQueuedFeedback();
+
  safeRender();refreshAllPanels();
- (function openFromHash(){const h=(location.hash||'').slice(1);if(['daily','food','flare','rewards','data'].includes(h)){showTab(h);history.replaceState(null,'',location.pathname+location.search)}})();
+ (function openFromHash(){const h=(location.hash||'').slice(1);
+   if(['daily','food','flare','rewards','data'].includes(h))showTab(h);
+   if(h==='more')setTimeout(()=>document.getElementById('moreToggle')?.click(),50);
+   if(h==='feedback')setTimeout(openFeedback,50);
+   if(h)history.replaceState(null,'',location.pathname+location.search)})();
 })();
 </script>
 </body>

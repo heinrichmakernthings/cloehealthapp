@@ -10,6 +10,10 @@
 //   GET  /api/admin/snapshots/:id  one backup            (X-Admin-Pin)
 //   GET  /api/state             synced data              (X-Sync-Key)
 //   PUT  /api/state             save synced data         (X-Sync-Key)
+//   POST /api/feedback          Cloe sends a suggestion  (public, rate limited)
+//   GET  /api/admin/feedback    list suggestions         (X-Admin-Pin)
+//   POST /api/admin/feedback/:id  mark done / not done   (X-Admin-Pin)
+//   DELETE /api/admin/feedback/:id                       (X-Admin-Pin)
 
 export const DEFAULT_CONFIG = {
   version: 1,
@@ -221,6 +225,35 @@ async function api(request, env, url) {
     const row = await env.DB.prepare('SELECT data, created_at FROM snapshots WHERE id = ?').bind(Number(snap[1])).first();
     if (!row) return json({ error: 'Not found' }, 404);
     return json({ data: JSON.parse(row.data), createdAt: row.created_at });
+  }
+
+  // ---- feedback ----
+  if (path === '/api/feedback' && method === 'POST') {
+    const body = await request.json().catch(() => ({}));
+    const message = String(body.message || '').trim().slice(0, 2000);
+    if (!message) return json({ error: 'Write something first' }, 400);
+    const kind = ['idea', 'bug', 'love', 'other'].includes(body.kind) ? body.kind : 'other';
+    const context = String(body.context || '').slice(0, 200);
+    const recent = await env.DB.prepare("SELECT COUNT(*) AS n FROM feedback WHERE created_at > datetime('now','-1 day')").first();
+    if ((recent?.n || 0) >= 40) return json({ error: 'Lots of feedback today already. Try again tomorrow.' }, 429);
+    await env.DB.prepare('INSERT INTO feedback (kind, message, context) VALUES (?, ?, ?)').bind(kind, message, context).run();
+    return json({ ok: true });
+  }
+  if (path === '/api/admin/feedback' && method === 'GET') {
+    const deny = await requireAdmin(request, env); if (deny) return deny;
+    const { results } = await env.DB.prepare('SELECT id, kind, message, context, done, created_at FROM feedback ORDER BY done ASC, id DESC LIMIT 300').all();
+    return json({ feedback: results });
+  }
+  const fb = path.match(/^\/api\/admin\/feedback\/(\d+)$/);
+  if (fb && (method === 'POST' || method === 'DELETE')) {
+    const deny = await requireAdmin(request, env); if (deny) return deny;
+    if (method === 'DELETE') {
+      await env.DB.prepare('DELETE FROM feedback WHERE id = ?').bind(Number(fb[1])).run();
+    } else {
+      const body = await request.json().catch(() => ({}));
+      await env.DB.prepare('UPDATE feedback SET done = ? WHERE id = ?').bind(body.done ? 1 : 0, Number(fb[1])).run();
+    }
+    return json({ ok: true });
   }
 
   // ---- Cloe's data sync ----

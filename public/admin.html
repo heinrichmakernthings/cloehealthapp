@@ -40,6 +40,13 @@ button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .pinbox{max-width:340px;margin:60px auto;text-align:center}.pinbox input{text-align:center;font-size:24px;letter-spacing:.3em}
 .err{color:var(--red);font-weight:700;font-size:14px;min-height:20px;margin-top:8px}
 .list small{color:var(--muted)}
+.badge-n{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:#e34948;color:#fff;font-size:11px;line-height:18px;text-align:center;margin-left:2px}
+.badge-n:empty{display:none}
+.fb{border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0;background:#fffafc}
+.fb.done{opacity:.55;background:#faf9f6}
+.fb p{margin:6px 0;color:var(--ink);font-size:15px;line-height:1.45;white-space:pre-wrap}
+.fb .meta{font-size:12px;color:var(--muted)}
+.fb .acts{display:flex;gap:6px;margin-top:6px}
 @media(max-width:520px){.g2{grid-template-columns:1fr}}
 </style>
 </head>
@@ -61,7 +68,8 @@ button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
   <p class="sub">Changes go live on her phone the next time she opens the app. Her logged data is never touched by anything here.</p>
 
   <div class="tabs">
-    <button class="tab active" data-tab="countdowns">⏳ Countdowns</button>
+    <button class="tab active" data-tab="feedback">💌 Feedback <span id="fbBadge" class="badge-n"></span></button>
+    <button class="tab" data-tab="countdowns">⏳ Countdowns</button>
     <button class="tab" data-tab="rewards">🎁 Rewards</button>
     <button class="tab" data-tab="coupons">🎟️ Coupons</button>
     <button class="tab" data-tab="pool">🎁 Present pool</button>
@@ -69,7 +77,15 @@ button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
     <button class="tab" data-tab="security">🔐 PIN</button>
   </div>
 
-  <section class="panel active" id="p-countdowns">
+  <section class="panel active" id="p-feedback">
+    <div class="card">
+      <h2>💌 Feedback from Cloe</h2>
+      <p class="helper">Everything she sends from the app's Feedback button. Tick things off as you do them.</p>
+      <div id="fbList" class="helper">Loading…</div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-countdowns">
     <div class="card">
       <h2>⏳ Things to look forward to</h2>
       <p class="helper">These rotate on her home screen. Past dates hide automatically. Tick “every year” for things like Christmas.</p>
@@ -171,7 +187,8 @@ button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
       syncKey=res.syncKey||'';
       sessionStorage.setItem('cozyAdminPin',PIN);
       $('login').style.display='none';$('main').style.display='block';
-      await loadConfig(); loadData();
+      await loadConfig(); loadData(); loadFeedback();
+      $('savebar').style.display='none';
     }catch(e){
       sessionStorage.removeItem('cozyAdminPin');
       $('loginErr').textContent=e.message;
@@ -184,7 +201,8 @@ button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
   document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===t));
     document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='p-'+t.dataset.tab));
-    $('savebar').style.display=['data','security'].includes(t.dataset.tab)?'none':'flex';
+    $('savebar').style.display=['data','security','feedback'].includes(t.dataset.tab)?'none':'flex';
+    if(t.dataset.tab==='feedback')loadFeedback();
   });
 
   function markDirty(){dirty=true;$('saveBtn').disabled=false;$('saveMsg').textContent='Unsaved changes';}
@@ -328,6 +346,26 @@ button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
     const s=await call('/api/admin/snapshots/'+id);
     const blob=new Blob([JSON.stringify({exportedAt:s.createdAt,state:s.data},null,2)],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cloe-backup-'+id+'.json';a.click();
+  });
+
+  // ---------- feedback ----------
+  const KIND={idea:'💡 Idea',bug:'🐛 Something\'s off',love:'💗 Love this',other:'💬 Note'};
+  async function loadFeedback(){
+    try{
+      const {feedback}=await call('/api/admin/feedback');
+      const open=feedback.filter(f=>!f.done).length;
+      $('fbBadge').textContent=open||'';
+      $('fbList').innerHTML=feedback.length?feedback.map(f=>`<div class="fb ${f.done?'done':''}">
+        <div class="meta">${KIND[f.kind]||KIND.other} · ${new Date(f.created_at.replace(' ','T')+'Z').toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+        <p>${esc(f.message)}</p>
+        <div class="acts"><button class="btn small" data-fb-done="${f.id}" data-v="${f.done?0:1}">${f.done?'↩ Reopen':'✓ Done'}</button><button class="btn small danger" data-fb-del="${f.id}">Delete</button></div>
+      </div>`).join(''):'Nothing yet. When she taps Feedback in the app, it lands here.';
+    }catch(e){$('fbList').textContent='⚠️ '+e.message}
+  }
+  $('fbList').addEventListener('click',async e=>{
+    const d=e.target.dataset;
+    if(d.fbDone){await call('/api/admin/feedback/'+d.fbDone,{method:'POST',body:JSON.stringify({done:d.v==='1'})});loadFeedback()}
+    if(d.fbDel){await call('/api/admin/feedback/'+d.fbDel,{method:'DELETE'});loadFeedback()}
   });
 
   // ---------- PIN ----------
