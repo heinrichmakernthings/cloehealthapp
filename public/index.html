@@ -3300,7 +3300,7 @@ details.fold[open] summary{margin-bottom:6px}
      }
    }catch(e){}
    const key=getSyncKey();
-   if(!key){setCloudStatus('☁️ Cloud backup is off on this phone.');return}
+   if(!key){setCloudStatus('☁️ Cloud backup is off on this phone. Ask Sam for your backup QR code: one scan and it is on.');return}
    setCloudStatus('☁️ Checking cloud backup…');
    try{
      const r=await fetch('/api/state',{headers:{'x-sync-key':key},cache:'no-store'});

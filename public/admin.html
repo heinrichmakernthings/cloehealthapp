@@ -47,6 +47,23 @@ button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .fb p{margin:6px 0;color:var(--ink);font-size:15px;line-height:1.45;white-space:pre-wrap}
 .fb .meta{font-size:12px;color:var(--muted)}
 .fb .acts{display:flex;gap:6px;margin-top:6px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;border:1px solid var(--line);border-radius:14px;background:#fff;margin-top:6px}
+.seg button{border:0;background:none;border-radius:10px;min-height:40px;font-weight:750;font-size:13px;color:var(--muted)}
+.seg button.on{background:var(--ink);color:#fff}
+.seg span{font-weight:600;opacity:.8}
+input[type=search]{-webkit-appearance:none}
+.loglist{margin-top:8px}
+.log{border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin:8px 0;background:#fffafc}
+.log-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.log-top b{font-size:15px}.log-top span{font-size:12px;color:var(--muted);white-space:nowrap}
+.log-scores{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.log-scores span{font-size:12px;border-radius:999px;padding:3px 8px;background:#fff;border:1px solid var(--line)}
+.log-scores span.hi{background:#ffe1e6;border-color:#f3b4c0}
+.log-fields{margin-top:7px;font-size:13px;line-height:1.45;color:var(--ink)}
+.log-fields div{margin-top:2px}.log-fields em{font-style:normal;color:var(--muted)}
+.dl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qr{display:flex;gap:14px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.qr svg{width:150px;height:150px;border-radius:12px;border:1px solid var(--line);background:#fff;padding:6px}
 @media(max-width:520px){.g2{grid-template-columns:1fr}}
 </style>
 </head>
@@ -69,6 +86,7 @@ button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 
   <div class="tabs">
     <button class="tab active" data-tab="feedback">💌 Feedback <span id="fbBadge" class="badge-n"></span></button>
+    <button class="tab" data-tab="logs">📒 Logs</button>
     <button class="tab" data-tab="countdowns">⏳ Countdowns</button>
     <button class="tab" data-tab="rewards">🎁 Rewards</button>
     <button class="tab" data-tab="coupons">🎟️ Coupons</button>
@@ -82,6 +100,32 @@ button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
       <h2>💌 Feedback from Cloe</h2>
       <p class="helper">Everything she sends from the app's Feedback button. Tick things off as you do them.</p>
       <div id="fbList" class="helper">Loading…</div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-logs">
+    <div class="card">
+      <h2>📒 Cloe's logs</h2>
+      <div id="logsStatus" class="helper">Loading…</div>
+      <div class="seg" id="logSeg">
+        <button class="on" data-log="daily">🌤 Check-ins <span id="nDaily"></span></button>
+        <button data-log="food">🍜 Food <span id="nFood"></span></button>
+        <button data-log="flare">🫶 Flares <span id="nFlare"></span></button>
+      </div>
+      <input id="logSearch" type="search" placeholder="Search (e.g. onion, dizzy, November)" style="margin-top:10px">
+      <div id="logList" class="loglist"></div>
+      <button class="btn" id="logMore" style="width:100%;margin-top:8px;display:none">Show more</button>
+    </div>
+    <div class="card">
+      <h2>⬇ Download for analysis</h2>
+      <p class="helper">Spreadsheet files (CSV) open in Excel, Numbers or Google Sheets. One row per entry, with every field as its own column.</p>
+      <div class="dl-grid">
+        <button class="btn" data-csv="daily">Check-ins CSV</button>
+        <button class="btn" data-csv="food">Food CSV</button>
+        <button class="btn" data-csv="flare">Flares CSV</button>
+        <button class="btn" data-csv="periods">Period starts CSV</button>
+        <button class="btn primary" id="csvAll" style="grid-column:1/-1">Download all four</button>
+      </div>
     </div>
   </section>
 
@@ -135,7 +179,8 @@ button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
     <div class="card">
       <h2>📲 Pairing link for her phone</h2>
       <p class="helper">Send this to Cloe and have her open it <b>on her phone, in the browser she uses for the app</b>. It switches cloud backup on, no password for her. Keep it private: anyone with this link can see her logs.</p>
-      <div class="code" id="pairLink">…</div>
+      <div class="qr"><div id="pairQr"></div><p class="helper" style="flex:1;min-width:160px;margin:0"><b>Easiest:</b> have her point her iPhone camera at this code and tap the link that pops up. Then it's done.</p></div>
+      <div class="code" id="pairLink" style="margin-top:10px">…</div>
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
         <button class="btn" id="copyPair">Copy link</button>
         <button class="btn" id="sharePair">Share…</button>
@@ -166,6 +211,7 @@ button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 </div>
 </div>
 
+<script src="/vendor/qrcode.js"></script>
 <script>
 (function(){
   const $=id=>document.getElementById(id);
@@ -187,7 +233,7 @@ button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
       syncKey=res.syncKey||'';
       sessionStorage.setItem('cozyAdminPin',PIN);
       $('login').style.display='none';$('main').style.display='block';
-      await loadConfig(); loadData(); loadFeedback();
+      await loadConfig(); loadData(); loadFeedback(); loadLogs();
       $('savebar').style.display='none';
     }catch(e){
       sessionStorage.removeItem('cozyAdminPin');
@@ -201,8 +247,9 @@ button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
   document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===t));
     document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='p-'+t.dataset.tab));
-    $('savebar').style.display=['data','security','feedback'].includes(t.dataset.tab)?'none':'flex';
+    $('savebar').style.display=['data','security','feedback','logs'].includes(t.dataset.tab)?'none':'flex';
     if(t.dataset.tab==='feedback')loadFeedback();
+    if(t.dataset.tab==='logs')loadLogs();
   });
 
   function markDirty(){dirty=true;$('saveBtn').disabled=false;$('saveMsg').textContent='Unsaved changes';}
@@ -321,6 +368,7 @@ button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
   async function loadData(){
     const link=location.origin+'/?pair='+encodeURIComponent(syncKey);
     $('pairLink').textContent=link;
+    try{const q=qrcode(0,'M');q.addData(link);q.make();$('pairQr').innerHTML=q.createSvgTag({cellSize:4,margin:2,scalable:true})}catch(e){}
     $('copyPair').onclick=async()=>{try{await navigator.clipboard.writeText(link);$('copyPair').textContent='Copied ✓'}catch(e){prompt('Copy this link',link)}};
     $('sharePair').onclick=()=>{if(navigator.share)navigator.share({title:'Cozy Club backup',text:'Open this on your phone to switch on cloud backup 💛',url:link});else $('copyPair').click()};
     try{
@@ -367,6 +415,67 @@ button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
     if(d.fbDone){await call('/api/admin/feedback/'+d.fbDone,{method:'POST',body:JSON.stringify({done:d.v==='1'})});loadFeedback()}
     if(d.fbDel){await call('/api/admin/feedback/'+d.fbDel,{method:'DELETE'});loadFeedback()}
   });
+
+  // ---------- logs ----------
+  const LABELS={date:'Date',time:'Time',overall:'Overall day',energy:'Energy',pain:'Pain',bloating:'Bloating',nausea:'Nausea',dizziness:'Dizziness',headache:'Headache',cramps:'Muscle cramps',brainFog:'Brain fog',stress:'Stress',sleepQuality:'Sleep quality',sleepHours:'Sleep hours',hydration:'Hydration',bowel:'Bowel',cycleDay:'Cycle day',cycleStage:'Cycle stage',notes:'Notes',meal:'Meal',food:'Food',portion:'Portion',flags:'Flags',symptoms:'Symptoms after',diarrhoea:'Diarrhoea',activity:'Doing',lastAte:'Hours since food',firstSymptom:'First symptom',painSide:'Pain location',duration:'Minutes',helped:'What helped',dizzy:'Faint / dizzy',shaking:'Shaking',disorientation:'Disorientation',heart:'Heart racing',savedAt:'Saved at'};
+  const ORDER={
+    daily:['date','overall','energy','pain','bloating','nausea','dizziness','headache','cramps','brainFog','stress','sleepQuality','sleepHours','hydration','bowel','cycleDay','cycleStage','notes'],
+    food:['date','time','meal','food','portion','flags','symptoms','bloating','cramps','diarrhoea','nausea','notes'],
+    flare:['date','time','activity','lastAte','firstSymptom','painSide','duration','dizzy','shaking','nausea','disorientation','pain','bloating','headache','heart','cramps','cycleStage','helped','notes']
+  };
+  const SCORE=new Set(['energy','pain','bloating','nausea','dizziness','headache','cramps','brainFog','stress','sleepQuality','diarrhoea','dizzy','shaking','disorientation','heart']);
+  const GOOD=new Set(['energy','sleepQuality']);
+  let LOGS=null,logType='daily',logLimit=30;
+  const byNewest=(x,y)=>((y.date||'')+(y.time||'')+(y.savedAt||'')).localeCompare((x.date||'')+(x.time||'')+(x.savedAt||''));
+  function columns(type,rows){
+    const seen=new Set();rows.forEach(r=>Object.keys(r).forEach(k=>seen.add(k)));
+    const skip=new Set(['id','_t','_st']);
+    return [...ORDER[type].filter(k=>seen.has(k)),...[...seen].filter(k=>!ORDER[type].includes(k)&&!skip.has(k)&&k!=='savedAt').sort(),...(seen.has('savedAt')?['savedAt']:[])];
+  }
+  const show=v=>Array.isArray(v)?v.join(', '):(v==null?'':String(v));
+  async function loadLogs(force){
+    if(LOGS&&!force){renderLogs();return}
+    try{
+      const st=await call('/api/admin/state');
+      if(!st.data){$('logsStatus').innerHTML='Nothing backed up yet. Her logs are only on her phone until she opens the pairing link once (☁️ Data & backup tab, or scan the QR code there).';LOGS={daily:[],food:[],flare:[],periodStarts:[]};}
+      else{LOGS=st.data;$('logsStatus').textContent='Last synced from her phone: '+new Date(st.updatedAt.replace(' ','T')+'Z').toLocaleString('en-GB')+'. Newest first.';}
+      $('nDaily').textContent=(LOGS.daily||[]).length;$('nFood').textContent=(LOGS.food||[]).length;$('nFlare').textContent=(LOGS.flare||[]).length;
+      renderLogs();
+    }catch(e){$('logsStatus').textContent='⚠️ '+e.message}
+  }
+  function renderLogs(){
+    const q=$('logSearch').value.trim().toLowerCase();
+    let rows=[...(LOGS[logType]||[])].sort(byNewest);
+    if(q)rows=rows.filter(r=>{const d=r.date?new Date(r.date+'T12:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'';return (JSON.stringify(r)+' '+d).toLowerCase().includes(q)});
+    const cols=columns(logType,rows);
+    $('logList').innerHTML=rows.length?rows.slice(0,logLimit).map(r=>{
+      const when=r.date?new Date(r.date+'T12:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'}):'';
+      const title=logType==='daily'?(r.overall||'Check-in'):logType==='food'?`${r.meal||'Meal'}: ${r.food||''}`:(`Flare${r.firstSymptom?': '+r.firstSymptom:''}`);
+      const scores=cols.filter(k=>SCORE.has(k)&&r[k]!==''&&r[k]!=null).map(k=>{const v=Number(r[k]);const hi=GOOD.has(k)?v<=3:v>=6;return `<span class="${hi?'hi':''}">${esc(LABELS[k]||k)} ${esc(r[k])}</span>`}).join('');
+      const fields=cols.filter(k=>!SCORE.has(k)&&!['date','overall','savedAt',logType==='food'?'food':'',logType==='food'?'meal':''].includes(k)&&show(r[k])!==''&&show(r[k])!=='Unknown').map(k=>`<div><em>${esc(LABELS[k]||k)}:</em> ${esc(show(r[k]))}</div>`).join('');
+      return `<div class="log"><div class="log-top"><b>${esc(title)}</b><span>${esc(when)}${r.time?' · '+esc(r.time):''}</span></div>${scores?`<div class="log-scores">${scores}</div>`:''}${fields?`<div class="log-fields">${fields}</div>`:''}</div>`;
+    }).join(''):'<p class="helper">No entries'+(q?' match that search.':' yet.')+'</p>';
+    $('logMore').style.display=rows.length>logLimit?'block':'none';
+    $('logMore').textContent=`Show more (${rows.length-logLimit} left)`;
+  }
+  $('logSeg').addEventListener('click',e=>{const b=e.target.closest('[data-log]');if(!b)return;logType=b.dataset.log;logLimit=30;document.querySelectorAll('#logSeg button').forEach(x=>x.classList.toggle('on',x===b));renderLogs()});
+  $('logSearch').addEventListener('input',()=>{logLimit=30;renderLogs()});
+  $('logMore').addEventListener('click',()=>{logLimit+=50;renderLogs()});
+  function csvFor(type){
+    if(type==='periods'){const list=(LOGS.periodStarts||[]).slice().sort();return 'Period start\n'+list.join('\n')+'\n'}
+    const rows=[...(LOGS[type]||[])].sort((x,y)=>byNewest(y,x));
+    const cols=columns(type,rows);
+    const cell=v=>{v=show(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+    return [cols.map(k=>cell(LABELS[k]||k)).join(','),...rows.map(r=>cols.map(k=>cell(r[k])).join(','))].join('\n')+'\n';
+  }
+  function download(type){
+    if(!LOGS)return;
+    const name={daily:'checkins',food:'food',flare:'flares',periods:'period-starts'}[type];
+    const blob=new Blob(['\ufeff'+csvFor(type)],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`cloe-${name}-${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(a);a.click();a.remove();
+  }
+  document.querySelectorAll('[data-csv]').forEach(b=>b.addEventListener('click',async()=>{await loadLogs();download(b.dataset.csv)}));
+  $('csvAll').addEventListener('click',async()=>{await loadLogs();['daily','food','flare','periods'].forEach((t,i)=>setTimeout(()=>download(t),i*350))});
 
   // ---------- PIN ----------
   $('changePin').onclick=async()=>{
